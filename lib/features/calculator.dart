@@ -100,13 +100,13 @@ class _CalculatorState extends State<CalculatorPage> {
                     'Margin',
                     r.margin == null
                         ? 'Tidak terdefinisi'
-                        : '${r.margin!.toStringAsFixed(2)}%',
+                        : '${NumberFormat('0.00', 'id_ID').format(r.margin!)}%',
                   ),
                   metricRow(
                     'Markup',
                     r.markup == null
                         ? 'Tidak terdefinisi'
-                        : '${r.markup!.toStringAsFixed(2)}%',
+                        : '${NumberFormat('0.00', 'id_ID').format(r.markup!)}%',
                   ),
                   metricRow(
                     'Harga impas/unit',

@@ -27,7 +27,7 @@ Database tersimpan di application support. Uninstall bisa menghapus semua data l
 ## Unduh APK dari GitHub
 
 1. Buka repository → **Actions → Android debug APK**.
-2. Pilih **Run workflow**, pilih `main` atau `develop`, lalu jalankan (push ke kedua branch juga memicu build).
+2. Pilih **Run workflow**, pilih `main` atau `develop`, lalu jalankan (push ke `main` juga memicu build).
 3. Tunggu status **Success** pada commit yang diinginkan.
 4. Buka run tersebut → **Artifacts → untungku-android-debug-apk**.
 5. Unduh ZIP, ekstrak `app-debug.apk`, lalu instal pada perangkat Android pengujian. Android dapat meminta izin instalasi dari sumber tersebut.

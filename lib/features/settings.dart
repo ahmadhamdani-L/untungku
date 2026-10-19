@@ -30,6 +30,7 @@ class _SettingsState extends ConsumerState<SettingsPage> {
       dialogTitle: 'Simpan file',
       fileName: filename,
       bytes: bytes,
+      mimeType: filename.endsWith('.json') ? 'application/json' : 'text/csv',
     );
     if (path != null && c.mounted) {
       ScaffoldMessenger.of(

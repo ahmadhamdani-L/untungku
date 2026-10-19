@@ -611,6 +611,7 @@ Widget metricRow(String label, String value) => Padding(
   child: Row(
     children: [
       Expanded(child: Text(label)),
+      const SizedBox(width: 12),
       Flexible(
         child: Text(
           value,

@@ -180,6 +180,61 @@ class _SettingsState extends ConsumerState<SettingsPage> {
                     }
                   }),
           ),
+          ListTile(
+            leading: const Icon(Icons.undo),
+            title: const Text('Pulihkan salinan pemulihan terakhir'),
+            subtitle: const Text(
+              'Kembali ke data sebelum restore terakhir pada perangkat ini',
+            ),
+            onTap: busy
+                ? null
+                : () => action(c, () async {
+                    final dir = await getApplicationSupportDirectory();
+                    final snapshots = await dir
+                        .list()
+                        .where(
+                          (f) =>
+                              f is File &&
+                              f.path.split('/').last.startsWith('recovery-') &&
+                              f.path.endsWith('.json'),
+                        )
+                        .toList();
+                    snapshots.sort((a, b) => b.path.compareTo(a.path));
+                    if (snapshots.isEmpty) {
+                      throw StateError('Belum ada salinan pemulihan.');
+                    }
+                    final source = await File(
+                      snapshots.first.path,
+                    ).readAsString();
+                    Store.validateBackup(source);
+                    if (!c.mounted ||
+                        !await confirm(
+                          c,
+                          'Pulihkan data sebelumnya?',
+                          'Seluruh data sekarang akan diganti dengan salinan sebelum restore terakhir.',
+                        )) {
+                      return;
+                    }
+                    setState(() => busy = true);
+                    try {
+                      await File(
+                        '${dir.path}/recovery-${DateTime.now().millisecondsSinceEpoch}.json',
+                      ).writeAsString(store.backup(), flush: true);
+                      await store.restore(source);
+                      if (c.mounted) {
+                        ScaffoldMessenger.of(c).showSnackBar(
+                          const SnackBar(
+                            content: Text('Salinan pemulihan berhasil dibuka'),
+                          ),
+                        );
+                      }
+                    } finally {
+                      if (mounted) {
+                        setState(() => busy = false);
+                      }
+                    }
+                  }),
+          ),
           const Divider(),
           const ListTile(
             leading: Icon(Icons.privacy_tip_outlined),
@@ -188,6 +243,7 @@ class _SettingsState extends ConsumerState<SettingsPage> {
               'Tidak ada akun wajib, analitik, atau server bisnis. Ekspor berisi informasi usaha Anda. Iklan dinonaktifkan pada build pengembangan.',
             ),
           ),
+          const OptionalAdBanner(),
           const ListTile(
             leading: Icon(Icons.info_outline),
             title: Text('UntungKu Pro 1.0.0'),

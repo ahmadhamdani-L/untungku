@@ -8,7 +8,7 @@ Gunakan Flutter **3.47.7 stable**, Dart bawaan Flutter, Java 17, dan Android SDK
 
 ```sh
 flutter pub get --enforce-lockfile
-dart run build_runner build --delete-conflicting-outputs
+dart run build_runner build
 dart format lib test integration_test
 flutter analyze
 flutter test
@@ -49,7 +49,7 @@ Jalankan **Signed Android AAB**, centang konfirmasi. Workflow memvalidasi secret
 
 `.env.example` hanya dokumentasi, **tidak otomatis dimuat Flutter**. Konfigurasi Dart menggunakan `--dart-define` atau `--dart-define-from-file`. Default `ADMOB_ENABLED=false`, `ADMOB_USE_MOCK=true`; startup tidak menginisialisasi Google SDK. `MockAdsService` menghasilkan loading/loaded/rewarded/dismissed atau failed secara deterministik tanpa koneksi iklan.
 
-Gradle menerima `ADMOB_ANDROID_APP_ID` dari environment proses build untuk placeholder Android manifest. Default adalah ID aplikasi contoh resmi Google. Environment host tidak otomatis menjadi nilai Dart. ID unit banner/interstitial/rewarded masih berupa rancangan konfigurasi; pemasangan iklan nyata dan UMP consent belum selesai. Build produksi beriklan diblokir oleh validator rilis sampai integrasi itu diverifikasi pada perangkat. Semua fitur bisnis tetap tersedia tanpa iklan.
+Gradle menerima `ADMOB_ANDROID_APP_ID` dari environment proses build untuk placeholder Android manifest. Default adalah ID aplikasi contoh resmi Google. Environment host tidak otomatis menjadi nilai Dart. Adapter banner/interstitial/rewarded memakai ID test resmi secara default; banner opsional berada di akhir pengaturan, dan interstitial/rewarded tidak dipasang pada alur transaksi. Adapter UMP meminta persetujuan sebelum SDK aktif dan menyediakan pilihan privasi. Integrasi iklan nyata belum diverifikasi pada perangkat. Build produksi beriklan diblokir oleh validator rilis sampai integrasi itu diverifikasi pada perangkat. Semua fitur bisnis tetap tersedia tanpa iklan.
 
 ## Branch dan verifikasi
 
@@ -60,3 +60,11 @@ Arsitektur, rumus, pembatalan, stok, dan batas schema ada di [docs/ARCHITECTURE.
 ## Identitas visual
 
 Ikon pertumbuhan tiga batang adalah desain programatik asli proyek, bukan logo pihak ketiga. Jalankan `python3 tool/generate_brand.py` (Pillow diperlukan) untuk membangun ulang launcher PNG semua density, ikon store 512px, adaptive vector, dan splash hijau. UI memakai emerald, lime, Material 3, tema sistem/terang/gelap, dan ikon Material. Screenshot store harus diambil dari aplikasi berjalan, bukan gambar ilustrasi.
+
+Mode test Google (memerlukan internet, bukan mode mock):
+
+```sh
+ADMOB_ANDROID_APP_ID='ca-app-pub-3940256099942544~3347511713' flutter run --dart-define-from-file=config/google-test.json
+```
+
+Banner hanya dimuat setelah persetujuan memungkinkan permintaan iklan. Gunakan menu pengaturan untuk penempatan test. Kegagalan iklan tidak menghalangi pencatatan bisnis. Tidak ada penempatan interstitial/rewarded otomatis pada tombol transaksi. Tidak ada klaim pendapatan dari iklan mock/test.

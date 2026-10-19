@@ -17,4 +17,12 @@ void main() {
       AdState.failed,
     ]);
   });
+  test('mock banner never loads SDK and interstitial has no reward', () async {
+    expect(await MockAdsService().loadBanner(), isNull);
+    expect(await MockAdsService().interstitial().toList(), [
+      AdState.loading,
+      AdState.loaded,
+      AdState.dismissed,
+    ]);
+  });
 }

@@ -20,6 +20,7 @@ void main() {
       ),
     );
     expect(find.text('Usaha rapi.\nUntung lebih pasti.'), findsOneWidget);
+    await tester.ensureVisible(find.text('Mulai / lewati pengenalan'));
     await tester.tap(find.text('Mulai / lewati pengenalan'));
     await tester.pumpAndSettle();
     expect(find.text('Kabar usaha Anda'), findsOneWidget);
@@ -27,12 +28,21 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Tambah produk'));
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text('Simpan produk'), 300);
+    await tester.scrollUntilVisible(
+      find.text('Simpan produk').hitTestable(),
+      250,
+      scrollable: find
+          .descendant(
+            of: find.byType(ProductForm),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Simpan produk'));
     await tester.pumpAndSettle();
     expect(find.text('Wajib diisi'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
-    store.dispose();
     await db.close();
   });
 }

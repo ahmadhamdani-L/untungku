@@ -33,12 +33,20 @@ void main() {
     await tester.enterText(fields.at(0), 'Kopi Integrasi');
     await tester.enterText(fields.at(3), '5000');
     await tester.enterText(fields.at(4), '10000');
-    await tester.scrollUntilVisible(
-      find.widgetWithText(TextFormField, 'Stok'),
-      200,
-    );
+    await tester.ensureVisible(find.widgetWithText(TextFormField, 'Stok'));
+    await tester.pumpAndSettle();
     await tester.enterText(find.widgetWithText(TextFormField, 'Stok'), '10');
-    await tester.scrollUntilVisible(find.text('Simpan produk'), 200);
+    await tester.scrollUntilVisible(
+      find.text('Simpan produk').hitTestable(),
+      250,
+      scrollable: find
+          .descendant(
+            of: find.byType(ProductForm),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Simpan produk'));
     await tester.pumpAndSettle();
     expect(store.products.single.name, 'Kopi Integrasi');
@@ -53,7 +61,11 @@ void main() {
     await tester.pumpAndSettle();
     await tester.enterText(find.widgetWithText(TextField, 'Jumlah'), '2');
     tester.testTextInput.hide();
-    await tester.scrollUntilVisible(find.text('Simpan penjualan'), 250);
+    await tester.scrollUntilVisible(
+      find.text('Simpan penjualan').hitTestable(),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.text('Simpan penjualan'));
     await tester.pumpAndSettle();
     expect(store.products.single.stock, 8);
@@ -75,7 +87,6 @@ void main() {
     expect(store.products.single.stock, 8);
     expect(store.expenses.single.amount, 1000);
     await tester.pumpWidget(const SizedBox());
-    store.dispose();
     await db.close();
   });
 }

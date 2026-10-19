@@ -198,4 +198,42 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     await db.close();
   });
+  testWidgets('renaming a selected category keeps the catalog visible', (
+    tester,
+  ) async {
+    final db = AppDatabase(NativeDatabase.memory());
+    final store = Store(db);
+    await store.load();
+    await store.saveSettings({'onboarded': true});
+    const product = Product(
+      id: 'category-test',
+      name: 'Produk kategori',
+      category: 'Lama',
+      price: 100,
+      cost: 50,
+      created: '2026-10-20',
+      updated: '2026-10-20',
+    );
+    await store.saveProduct(product);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [storeProvider.overrideWith((ref) => store)],
+        child: const UntungkuApp(),
+      ),
+    );
+    await tester.tap(find.text('Produk'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(DropdownButton<String>).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Lama').last);
+    await tester.pumpAndSettle();
+    await store.saveProduct(
+      Product.fromJson({...product.toJson(), 'category': 'Baru'}),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Produk kategori'), findsOneWidget);
+    expect(find.text('Katalog masih kosong'), findsNothing);
+    await tester.pumpWidget(const SizedBox());
+    await db.close();
+  });
 }

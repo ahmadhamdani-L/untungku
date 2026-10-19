@@ -16,12 +16,14 @@ class _ProductsState extends ConsumerState<ProductsPage> {
       'Semua',
       ...store.products.map((p) => p.category).where((v) => v.isNotEmpty),
     };
+    final selectedCategory = categories.contains(category) ? category : 'Semua';
     final ps =
         store.products
             .where(
               (p) =>
                   p.archived == archived &&
-                  (category == 'Semua' || p.category == category) &&
+                  (selectedCategory == 'Semua' ||
+                      p.category == selectedCategory) &&
                   '${p.name} ${p.sku}'.toLowerCase().contains(
                     query.toLowerCase(),
                   ),
@@ -57,7 +59,7 @@ class _ProductsState extends ConsumerState<ProductsPage> {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             DropdownButton<String>(
-              value: categories.contains(category) ? category : 'Semua',
+              value: selectedCategory,
               items: categories
                   .map((v) => DropdownMenuItem(value: v, child: Text(v)))
                   .toList(),

@@ -17,7 +17,13 @@ class _TransactionsState extends ConsumerState<TransactionsPage> {
       return text.toLowerCase().contains(query.toLowerCase()) &&
           (range == null ||
               (!d.isBefore(range!.start) &&
-                  d.isBefore(range!.end.add(const Duration(days: 1)))));
+                  d.isBefore(
+                    DateTime(
+                      range!.end.year,
+                      range!.end.month,
+                      range!.end.day + 1,
+                    ),
+                  )));
     }
 
     final rows = <({String date, Widget child})>[

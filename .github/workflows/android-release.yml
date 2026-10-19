@@ -1,0 +1,52 @@
+name: Signed Android AAB
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_signed_build:
+        description: 'Build a signed bundle for owner review (does not publish to Play)'
+        type: boolean
+        required: true
+        default: false
+permissions:
+  contents: read
+jobs:
+  bundle:
+    if: inputs.confirm_signed_build
+    environment: release
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tool/validate_release.py
+      - name: Prepare signing material
+        shell: python
+        run: |
+          import os,base64,pathlib
+          pathlib.Path('android/app/release.jks').write_bytes(base64.b64decode(os.environ['ANDROID_KEYSTORE_BASE64'],validate=True))
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.7'
+          channel: stable
+          cache: true
+      - run: flutter pub get --enforce-lockfile
+      - run: flutter analyze
+      - run: flutter test
+      - run: flutter build appbundle --release --dart-define=ADMOB_ENABLED=false --dart-define=ADMOB_USE_MOCK=true
+      - run: test -s build/app/outputs/bundle/release/app-release.aab
+      - uses: actions/upload-artifact@v4
+        with:
+          name: untungku-signed-release-aab
+          path: build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 7
+      - if: always()
+        run: rm -f android/app/release.jks

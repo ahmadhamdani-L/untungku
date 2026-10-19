@@ -254,7 +254,7 @@ class _ProductFormState extends ConsumerState<ProductForm> {
                   child: TextFormField(
                     controller: fields[i],
                     keyboardType: i >= 3
-                        ? TextInputType.number
+                        ? TextInputType.numberWithOptions(signed: i == 7)
                         : TextInputType.text,
                     decoration: InputDecoration(
                       labelText: [
@@ -275,9 +275,14 @@ class _ProductFormState extends ConsumerState<ProductForm> {
                       }
                       if (i >= 3 &&
                           (int.tryParse(v ?? '') == null ||
-                              int.parse(v!) < 0 ||
-                              int.parse(v) > maxMoney)) {
-                        return 'Masukkan bilangan bulat positif atau nol';
+                              (int.parse(v!) < 0 &&
+                                  (i != 7 ||
+                                      !ref
+                                          .read(storeProvider)
+                                          .allowNegativeStock)) ||
+                              int.parse(v).abs() >
+                                  (i >= 7 ? 1000000000 : maxMoney))) {
+                        return 'Masukkan bilangan bulat sesuai kebijakan dan batas nilai';
                       }
                       return null;
                     },

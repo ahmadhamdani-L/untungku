@@ -57,10 +57,11 @@ class Product {
     'archived': archived ?? this.archived,
     'updated': DateTime.now().toIso8601String(),
   });
-  void validate() {
+  void validate({bool allowNegativeStock = false}) {
     if (id.isEmpty ||
         name.trim().isEmpty ||
-        stock < 0 ||
+        (stock < 0 && !allowNegativeStock) ||
+        stock < -1000000000 ||
         stock > 1000000000 ||
         threshold < 0 ||
         threshold > 1000000000) {

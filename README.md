@@ -68,3 +68,5 @@ ADMOB_ANDROID_APP_ID='ca-app-pub-3940256099942544~3347511713' flutter run --dart
 ```
 
 Banner hanya dimuat setelah persetujuan memungkinkan permintaan iklan. Gunakan menu pengaturan untuk penempatan test. Kegagalan iklan tidak menghalangi pencatatan bisnis. Tidak ada penempatan interstitial/rewarded otomatis pada tombol transaksi. Tidak ada klaim pendapatan dari iklan mock/test.
+
+Kebijakan stok: default menolak penjualan jika stok tidak cukup. Pengaturan **Izinkan stok minus** memerlukan konfirmasi dan mencatat unit yang belum tersedia sebagai stok negatif. Penuhi stok tersebut sebelum menonaktifkan kebijakan ini. Backup menyimpan kebijakan dan memvalidasi saldo ledger.

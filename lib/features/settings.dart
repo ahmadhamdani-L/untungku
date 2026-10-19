@@ -92,6 +92,29 @@ class _SettingsState extends ConsumerState<SettingsPage> {
             }),
             child: const Text('Simpan preferensi'),
           ),
+          const SizedBox(height: 20),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Izinkan stok minus'),
+            subtitle: const Text(
+              'Default ditolak. Aktifkan hanya untuk pesanan barang yang belum tersedia; stok minus tetap tercatat dan perlu dipenuhi.',
+            ),
+            value: store.allowNegativeStock,
+            onChanged: (value) => action(c, () async {
+              if (value &&
+                  !await confirm(
+                    c,
+                    'Izinkan penjualan melebihi stok?',
+                    'Stok dapat menjadi minus. Angka minus menunjukkan unit yang belum tersedia dan wajib Anda penuhi. Estimasi laba tetap memakai modal yang dicatat.',
+                  )) {
+                return;
+              }
+              await store.saveSettings({
+                ...store.settings,
+                'allowNegativeStock': value,
+              });
+            }),
+          ),
           const SizedBox(height: 28),
           Text('Backup & ekspor', style: Theme.of(c).textTheme.titleLarge),
           const SizedBox(height: 8),
@@ -253,7 +276,7 @@ class _SettingsState extends ConsumerState<SettingsPage> {
             leading: Icon(Icons.info_outline),
             title: Text('UntungKu Pro 1.0.0'),
             subtitle: Text(
-              'Estimasi laba bukan nasihat keuangan. Retur parsial: revisi transaksi. Pembatalan penuh mengembalikan stok. Stok negatif tidak diizinkan.',
+              'Estimasi laba bukan nasihat keuangan. Retur parsial: revisi transaksi. Pembatalan penuh mengembalikan stok. Stok minus ditolak secara default dan hanya diizinkan melalui pengaturan eksplisit.',
             ),
           ),
         ],

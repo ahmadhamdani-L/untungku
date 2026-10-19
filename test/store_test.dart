@@ -152,4 +152,59 @@ void main() {
     expect(store.products.single.stock, 12);
     expect(store.movements.length, 2);
   });
+  test(
+    'negative inventory requires explicit policy and cannot be silently disabled',
+    () async {
+      await store.saveSettings({'allowNegativeStock': true});
+      await store.saveSale(sale(12));
+      expect(store.products.single.stock, -2);
+      await expectLater(
+        store.saveSettings({'allowNegativeStock': false}),
+        throwsArgumentError,
+      );
+      expect(store.allowNegativeStock, true);
+      await store.adjustStock('p', 2, 'Penuhi pesanan');
+      await store.saveSettings({'allowNegativeStock': false});
+      expect(store.allowNegativeStock, false);
+      await store.voidSale('s');
+      expect(store.products.single.stock, 12);
+    },
+  );
+  test(
+    'backorder edits, backup restore and cancellation keep the ledger consistent',
+    () async {
+      await store.saveSettings({'allowNegativeStock': true});
+      await store.saveSale(sale(12));
+      await store.saveSale(sale(11));
+      expect(store.products.single.stock, -1);
+      final backup = store.backup();
+      await store.adjustStock('p', 4, 'Restok');
+      await store.restore(backup);
+      expect(store.products.single.stock, -1);
+      final invalid = jsonDecode(backup);
+      invalid['settings']['allowNegativeStock'] = false;
+      await expectLater(
+        store.restore(jsonEncode(invalid)),
+        throwsArgumentError,
+      );
+      expect(store.products.single.stock, -1);
+      await store.voidSale('s');
+      await store.voidSale('s');
+      expect(store.products.single.stock, 10);
+    },
+  );
+  test('stock policy never bypasses product archive', () async {
+    await store.saveSettings({'allowNegativeStock': true});
+    await store.archiveProduct('p', true);
+    await expectLater(store.saveSale(sale(20)), throwsArgumentError);
+    expect(store.products.single.stock, 10);
+  });
+  test('stock return overflow rolls back cancellation', () async {
+    await store.saveSale(sale(1));
+    await store.adjustStock('p', 999999991, 'Uji batas');
+    await expectLater(store.voidSale('s'), throwsArgumentError);
+    await store.load();
+    expect(store.products.single.stock, 1000000000);
+    expect(store.sales.single.voided, false);
+  });
 }

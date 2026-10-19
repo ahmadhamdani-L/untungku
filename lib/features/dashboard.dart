@@ -54,12 +54,8 @@ class _DashboardState extends ConsumerState<Dashboard> {
       0,
       (v, s) => v + s.lines.fold(0, (v, l) => v + l.quantity),
     );
-    final best = <String, int>{};
-    for (final s in sales) {
-      for (final l in s.lines) {
-        best.update(l.name, (v) => v + l.quantity, ifAbsent: () => l.quantity);
-      }
-    }
+    final best = bestSellerCounts(sales);
+    final names = {for (final p in store.products) p.id: p.name};
     final ranking = best.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     return PageBody(
@@ -200,7 +196,7 @@ class _DashboardState extends ConsumerState<Dashboard> {
           Card(
             child: ListTile(
               leading: const Icon(Icons.local_fire_department_outlined),
-              title: Text(e.key),
+              title: Text(names[e.key] ?? e.key),
               trailing: Text('${e.value} unit'),
             ),
           ),

@@ -15,6 +15,7 @@ class Store extends ChangeNotifier {
   List<Expense> expenses = [];
   List<Map<String, dynamic>> movements = [];
   Map<String, dynamic> settings = {};
+  bool get allowNegativeStock => settings['allowNegativeStock'] == true;
   Store(this.db);
   Future<void> load() async {
     Map<String, dynamic> decode(String value) =>
@@ -115,7 +116,7 @@ class Store extends ChangeNotifier {
   }
 
   Future<void> saveProduct(Product product, {String? expectedUpdated}) async {
-    product.validate();
+    product.validate(allowNegativeStock: allowNegativeStock);
     await db.transaction(() async {
       final old = await (db.select(
         db.productRows,
@@ -157,7 +158,8 @@ class Store extends ChangeNotifier {
     }
     await db.transaction(() async {
       final p = await productInTransaction(id);
-      if (p.stock + delta < 0 || p.stock + delta > 1000000000) {
+      if ((!allowNegativeStock && p.stock + delta < 0) ||
+          (p.stock + delta).abs() > 1000000000) {
         throw ArgumentError('Stok tidak cukup');
       }
       await put('product', id, p.copy(stock: p.stock + delta).toJson());
@@ -183,6 +185,9 @@ class Store extends ChangeNotifier {
         }
         for (final l in old.lines) {
           final p = await productInTransaction(l.productId);
+          if (p.stock + l.quantity > 1000000000) {
+            throw ArgumentError('Stok setelah pengembalian melebihi batas');
+          }
           await put(
             'product',
             p.id,
@@ -193,7 +198,9 @@ class Store extends ChangeNotifier {
       }
       for (final l in sale.lines) {
         final p = await productInTransaction(l.productId);
-        if (p.archived || p.stock < l.quantity) {
+        if (p.archived ||
+            (!allowNegativeStock && p.stock < l.quantity) ||
+            p.stock - l.quantity < -1000000000) {
           throw ArgumentError(
             'Stok ${p.name} tidak cukup atau produk diarsipkan',
           );
@@ -221,6 +228,9 @@ class Store extends ChangeNotifier {
       }
       for (final l in sale.lines) {
         final p = await productInTransaction(l.productId);
+        if (p.stock + l.quantity > 1000000000) {
+          throw ArgumentError('Stok setelah pengembalian melebihi batas');
+        }
         await put(
           'product',
           p.id,
@@ -249,6 +259,14 @@ class Store extends ChangeNotifier {
   }
 
   Future<void> saveSettings(Map<String, dynamic> s) async {
+    if (s['allowNegativeStock'] != null && s['allowNegativeStock'] is! bool) {
+      throw ArgumentError('Kebijakan stok tidak valid');
+    }
+    if (s['allowNegativeStock'] != true && products.any((p) => p.stock < 0)) {
+      throw ArgumentError(
+        'Selesaikan stok minus sebelum menonaktifkan kebijakan ini',
+      );
+    }
     await put('settings', 'settings', s);
     await load();
   }
@@ -271,12 +289,17 @@ class Store extends ChangeNotifier {
     if (b['app'] != 'untungku-pro' || b['version'] != 1) {
       throw const FormatException('Format atau versi backup tidak didukung');
     }
+    final settings = Map<String, dynamic>.from(b['settings']);
+    if (settings['allowNegativeStock'] != null &&
+        settings['allowNegativeStock'] is! bool) {
+      throw const FormatException('Kebijakan stok tidak valid');
+    }
     final ps = (b['products'] as List)
         .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
         .toList();
     final ids = <String>{};
     for (final p in ps) {
-      p.validate();
+      p.validate(allowNegativeStock: settings['allowNegativeStock'] == true);
       if (!ids.add(p.id)) {
         throw const FormatException('ID produk duplikat');
       }
@@ -311,6 +334,7 @@ class Store extends ChangeNotifier {
           !moveIds.add(e['id']) ||
           !ids.contains(e['productId']) ||
           e['delta'] is! int ||
+          (e['delta'] as int).abs() > 2000000000 ||
           e['reason'] is! String) {
         throw const FormatException('Mutasi tidak valid');
       }
@@ -326,7 +350,6 @@ class Store extends ChangeNotifier {
         throw const FormatException('Stok tidak konsisten dengan mutasi');
       }
     }
-    final settings = Map<String, dynamic>.from(b['settings']);
     if (settings['business'] != null && settings['business'] is! String) {
       throw const FormatException('Nama usaha tidak valid');
     }

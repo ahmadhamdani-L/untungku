@@ -12,6 +12,7 @@ import '../data/store.dart';
 import '../services/ads.dart';
 import '../domain/models.dart';
 import '../domain/money.dart';
+import '../domain/reporting.dart';
 
 part 'dashboard.dart';
 part 'products.dart';
@@ -114,11 +115,15 @@ class Onboarding extends ConsumerWidget {
                 ),
                 const SizedBox(height: 28),
                 FilledButton.icon(
-                  onPressed: () => ref.read(storeProvider).saveSettings({
-                    'onboarded': true,
-                    'business': 'Usaha Saya',
-                    'theme': 'system',
-                    'feeBps': 0,
+                  onPressed: () => action(context, () async {
+                    final store = ref.read(storeProvider);
+                    await store.saveSettings({
+                      ...store.settings,
+                      'onboarded': true,
+                      'business': store.settings['business'] ?? 'Usaha Saya',
+                      'theme': store.settings['theme'] ?? 'system',
+                      'feeBps': store.settings['feeBps'] ?? 0,
+                    });
                   }),
                   icon: const Icon(Icons.arrow_forward),
                   label: const Text('Mulai / lewati pengenalan'),

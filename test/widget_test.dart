@@ -102,4 +102,61 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     await db.close();
   });
+  testWidgets('settings persist dark theme and reject invalid fee', (
+    tester,
+  ) async {
+    final db = AppDatabase(NativeDatabase.memory());
+    final store = Store(db);
+    await store.load();
+    await store.saveSettings({'onboarded': true});
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [storeProvider.overrideWith((ref) => store)],
+        child: const UntungkuApp(),
+      ),
+    );
+    await tester.tap(find.byTooltip('Pengaturan & backup'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byType(DropdownButtonFormField<String>).hitTestable(),
+      150,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(DropdownButtonFormField<String>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Gelap').last);
+    await tester.pumpAndSettle();
+    expect(store.settings['theme'], 'dark');
+    expect(
+      Theme.of(tester.element(find.text('Pengaturan usaha'))).brightness,
+      Brightness.dark,
+    );
+    await tester.scrollUntilVisible(
+      find
+          .widgetWithText(TextField, 'Asumsi biaya transaksi (%)')
+          .hitTestable(),
+      -200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Asumsi biaya transaksi (%)'),
+      '100',
+    );
+    tester.testTextInput.hide();
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Simpan preferensi').hitTestable(),
+      150,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Simpan preferensi'));
+    await tester.pumpAndSettle();
+    expect(store.settings['feeBps'], isNull);
+    expect(find.textContaining('Persentase harus'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+    await db.close();
+  });
 }

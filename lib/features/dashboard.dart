@@ -14,12 +14,7 @@ class _DashboardState extends ConsumerState<Dashboard> {
     final store = ref.watch(storeProvider);
     final now = DateTime.now();
     final start =
-        range?.start ??
-        DateTime(
-          now.year,
-          now.month,
-          now.day,
-        ).subtract(Duration(days: days - 1));
+        range?.start ?? DateTime(now.year, now.month, now.day - days + 1);
     final end = range == null
         ? DateTime(now.year, now.month, now.day + 1)
         : DateTime(range!.end.year, range!.end.month, range!.end.day + 1);

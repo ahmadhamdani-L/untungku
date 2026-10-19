@@ -48,7 +48,13 @@ void main() {
     await dir.delete(recursive: true);
   });
   test('calendar overflow and malformed dates rejected', () {
-    for (final d in ['2026-02-31', '2026-13-01', '2026-00-01', 'garbage']) {
+    for (final d in [
+      '2026-02-31',
+      '2026-13-01',
+      '2026-00-01',
+      'garbage',
+      '2026-10-19T99:99:99',
+    ]) {
       expect(() => validDate(d), throwsFormatException);
     }
     expect(validDate('2024-02-29').day, 29);

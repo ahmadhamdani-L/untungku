@@ -130,4 +130,26 @@ void main() {
     b['version'] = 99;
     expect(() => Store.validateBackup(jsonEncode(b)), throwsFormatException);
   });
+  test('stale product edit cannot overwrite sale stock', () async {
+    await store.saveSale(sale(2));
+    await expectLater(
+      store.saveProduct(product, expectedUpdated: product.updated),
+      throwsStateError,
+    );
+    expect(store.products.single.stock, 8);
+    await store.archiveProduct(product.id, true);
+    expect(store.products.single.stock, 8);
+    expect(store.products.single.archived, true);
+  });
+  test('restore database failure rolls back the entire replacement', () async {
+    final backup = store.backup();
+    await store.adjustStock('p', 2, 'Restok');
+    await db.customStatement(
+      "CREATE TRIGGER reject_restore BEFORE INSERT ON product_rows BEGIN SELECT RAISE(ABORT, 'simulated disk write failure'); END",
+    );
+    await expectLater(store.restore(backup), throwsA(anything));
+    await store.load();
+    expect(store.products.single.stock, 12);
+    expect(store.movements.length, 2);
+  });
 }

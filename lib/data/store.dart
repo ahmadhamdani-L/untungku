@@ -152,12 +152,12 @@ class Store extends ChangeNotifier {
   }
 
   Future<void> adjustStock(String id, int delta, String reason) async {
-    if (reason.trim().isEmpty || delta == 0) {
+    if (reason.trim().isEmpty || delta == 0 || delta.abs() > 1000000000) {
       throw ArgumentError('Jumlah dan alasan wajib diisi');
     }
     await db.transaction(() async {
       final p = await productInTransaction(id);
-      if (p.stock + delta < 0) {
+      if (p.stock + delta < 0 || p.stock + delta > 1000000000) {
         throw ArgumentError('Stok tidak cukup');
       }
       await put('product', id, p.copy(stock: p.stock + delta).toJson());

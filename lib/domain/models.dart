@@ -58,7 +58,12 @@ class Product {
     'updated': DateTime.now().toIso8601String(),
   });
   void validate() {
-    if (id.isEmpty || name.trim().isEmpty || stock < 0 || threshold < 0) {
+    if (id.isEmpty ||
+        name.trim().isEmpty ||
+        stock < 0 ||
+        stock > 1000000000 ||
+        threshold < 0 ||
+        threshold > 1000000000) {
       throw ArgumentError('Data produk tidak valid');
     }
     for (final v in [cost, price, packaging, extra]) {

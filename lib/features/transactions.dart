@@ -429,6 +429,7 @@ class _SaleFormState extends ConsumerState<SaleForm> {
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
+            key: ValueKey(cart.map((e) => e.product.id).join(',')),
             initialValue: null,
             decoration: const InputDecoration(labelText: 'Tambahkan produk'),
             items: products

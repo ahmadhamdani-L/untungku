@@ -86,4 +86,26 @@ void main() {
       }
     }
   });
+  test('target absolute profit meets requested amount', () {
+    const input = ProfitInput(
+      price: 10000,
+      cost: 3000,
+      packaging: 500,
+      quantity: 3,
+      discount: 1000,
+      fixed: 1000,
+      feeBps: 725,
+    );
+    final price = input.priceForProfit(20000);
+    final actual = ProfitInput(
+      price: price,
+      cost: 3000,
+      packaging: 500,
+      quantity: 3,
+      discount: 1000,
+      fixed: 1000,
+      feeBps: 725,
+    ).calculate();
+    expect(actual.net, greaterThanOrEqualTo(20000));
+  });
 }

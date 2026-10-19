@@ -12,7 +12,7 @@ def icon(size):
  return im.resize((size,size),Image.Resampling.LANCZOS)
 for density,size in [('mdpi',48),('hdpi',72),('xhdpi',96),('xxhdpi',144),('xxxhdpi',192)]:
  icon(size).save(root/f'android/app/src/main/res/mipmap-{density}/ic_launcher.png')
-icon(512).save(root/'assets/branding/untungku-icon-512.png')
+icon(512).convert('RGBA').save(root/'assets/branding/untungku-icon-512.png')
 res=root/'android/app/src/main/res';(res/'mipmap-anydpi-v26').mkdir(exist_ok=True)
 (res/'drawable/ic_launcher_foreground.xml').write_text('''<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108"><path android:fillColor="#D9FF85" android:pathData="M30,57 L42,57 L42,78 L30,78 Z M48,45 L60,45 L60,78 L48,78 Z M66,31 L78,31 L78,78 L66,78 Z"/><path android:strokeColor="#FFFFFF" android:strokeWidth="3" android:pathData="M30,45 L51,31 L75,22"/></vector>''')
 (res/'values/colors.xml').write_text('<resources><color name="brand_green">#087F5B</color></resources>')

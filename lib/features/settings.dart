@@ -168,7 +168,9 @@ class _SettingsState extends ConsumerState<SettingsPage> {
                       ).writeAsString(store.backup(), flush: true);
                       await store.restore(source);
                       if (c.mounted) {
-                        ScaffoldMessenger.of(c).showSnackBar(
+                        final messenger = ScaffoldMessenger.of(c);
+                        Navigator.pop(c);
+                        messenger.showSnackBar(
                           const SnackBar(
                             content: Text('Backup berhasil dipulihkan'),
                           ),
@@ -223,7 +225,9 @@ class _SettingsState extends ConsumerState<SettingsPage> {
                       ).writeAsString(store.backup(), flush: true);
                       await store.restore(source);
                       if (c.mounted) {
-                        ScaffoldMessenger.of(c).showSnackBar(
+                        final messenger = ScaffoldMessenger.of(c);
+                        Navigator.pop(c);
+                        messenger.showSnackBar(
                           const SnackBar(
                             content: Text('Salinan pemulihan berhasil dibuka'),
                           ),

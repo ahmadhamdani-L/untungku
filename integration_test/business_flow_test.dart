@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -8,6 +9,17 @@ import 'package:untungku_pro/data/database.dart';
 import 'package:untungku_pro/data/store.dart';
 import 'package:untungku_pro/domain/models.dart';
 import 'package:untungku_pro/features/app.dart';
+
+Future<void> dismissNativeKeyboard(WidgetTester tester) async {
+  FocusManager.instance.primaryFocus?.unfocus();
+  await SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
+  await tester.pump(const Duration(milliseconds: 300));
+  for (var i = 0; i < 50 && tester.view.viewInsets.bottom > 0; i++) {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+  expect(tester.view.viewInsets.bottom, 0);
+  await tester.pumpAndSettle();
+}
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +48,7 @@ void main() {
     await tester.ensureVisible(find.widgetWithText(TextFormField, 'Stok'));
     await tester.pumpAndSettle();
     await tester.enterText(find.widgetWithText(TextFormField, 'Stok'), '10');
+    await dismissNativeKeyboard(tester);
     await tester.scrollUntilVisible(
       find.text('Simpan produk').hitTestable(),
       250,
@@ -60,8 +73,7 @@ void main() {
     await tester.tap(find.text('Kopi Integrasi • stok 10').last);
     await tester.pumpAndSettle();
     await tester.enterText(find.widgetWithText(TextField, 'Jumlah'), '2');
-    FocusManager.instance.primaryFocus?.unfocus();
-    await tester.pumpAndSettle();
+    await dismissNativeKeyboard(tester);
     await tester.scrollUntilVisible(
       find.text('Simpan penjualan').hitTestable(),
       250,

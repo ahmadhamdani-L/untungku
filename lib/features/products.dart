@@ -138,6 +138,7 @@ class _ProductsState extends ConsumerState<ProductsPage> {
 }
 
 Future<void> stockDialog(BuildContext c, Store store, Product p) async {
+  bool busy = false;
   final delta = TextEditingController(), reason = TextEditingController();
   await showDialog(
     context: c,
@@ -187,9 +188,14 @@ Future<void> stockDialog(BuildContext c, Store store, Product p) async {
         ),
         FilledButton(
           onPressed: () => action(d, () async {
-            await store.adjustStock(p.id, int.parse(delta.text), reason.text);
-            if (d.mounted) {
-              Navigator.pop(d);
+            if (busy) return;
+            busy = true;
+            try {
+              await store.adjustStock(p.id, int.parse(delta.text), reason.text);
+              if (d.mounted) Navigator.pop(d);
+            } catch (_) {
+              busy = false;
+              rethrow;
             }
           }),
           child: const Text('Simpan'),
@@ -210,12 +216,15 @@ class ProductForm extends ConsumerStatefulWidget {
 
 class _ProductFormState extends ConsumerState<ProductForm> {
   final key = GlobalKey<FormState>();
+  late final String productId, createdAt;
   late final List<TextEditingController> fields;
   bool busy = false;
   @override
   void initState() {
     super.initState();
     final p = widget.product;
+    productId = p?.id ?? uuid.v4();
+    createdAt = p?.created ?? DateTime.now().toIso8601String();
     fields = [
       p?.name ?? '',
       p?.sku ?? '',
@@ -292,6 +301,7 @@ class _ProductFormState extends ConsumerState<ProductForm> {
                 onPressed: busy
                     ? null
                     : () => action(c, () async {
+                        if (busy) return;
                         if (!key.currentState!.validate()) {
                           return;
                         }
@@ -303,7 +313,7 @@ class _ProductFormState extends ConsumerState<ProductForm> {
                               .read(storeProvider)
                               .saveProduct(
                                 Product(
-                                  id: widget.product?.id ?? uuid.v4(),
+                                  id: productId,
                                   name: fields[0].text.trim(),
                                   sku: fields[1].text.trim(),
                                   category: fields[2].text.trim(),
@@ -313,7 +323,7 @@ class _ProductFormState extends ConsumerState<ProductForm> {
                                   extra: n(6),
                                   stock: n(7),
                                   threshold: n(8),
-                                  created: widget.product?.created ?? now,
+                                  created: createdAt,
                                   updated: now,
                                   archived: widget.product?.archived ?? false,
                                 ),

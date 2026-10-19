@@ -95,8 +95,15 @@ void main() {
     );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Simpan penjualan'));
+    await tester.tap(find.text('Simpan penjualan'));
     await tester.pumpAndSettle();
     expect(store.sales.length, 1);
+    expect(
+      store.movements
+          .where((m) => (m['reason'] as String).startsWith('Penjualan'))
+          .length,
+      1,
+    );
     expect(store.products.single.stock, 8);
     expect(store.sales.single.result.net, 10000);
     await tester.pumpWidget(const SizedBox());

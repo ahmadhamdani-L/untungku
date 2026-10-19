@@ -210,6 +210,7 @@ class _TransactionsState extends ConsumerState<TransactionsPage> {
 }
 
 Future<void> expenseDialog(BuildContext c, Store store, [Expense? e]) async {
+  final expenseId = e?.id ?? uuid.v4();
   final category = TextEditingController(text: e?.category ?? ''),
       amount = TextEditingController(text: e?.amount.toString() ?? ''),
       note = TextEditingController(text: e?.note ?? '');
@@ -288,11 +289,12 @@ Future<void> expenseDialog(BuildContext c, Store store, [Expense? e]) async {
             onPressed: busy
                 ? null
                 : () => action(d, () async {
+                    if (busy) return;
                     set(() => busy = true);
                     try {
                       await store.saveExpense(
                         Expense(
-                          id: e?.id ?? uuid.v4(),
+                          id: expenseId,
                           date: date.toIso8601String(),
                           category: category.text.trim(),
                           note: note.text,
@@ -345,6 +347,7 @@ class SaleForm extends ConsumerStatefulWidget {
 
 class _SaleFormState extends ConsumerState<SaleForm> {
   final cart = <CartEntry>[];
+  late final String saleId;
   late final TextEditingController discount, fixed, fee, note;
   String payment = 'Tunai';
   bool busy = false;
@@ -353,6 +356,7 @@ class _SaleFormState extends ConsumerState<SaleForm> {
   void initState() {
     super.initState();
     final s = widget.sale;
+    saleId = s?.id ?? uuid.v4();
     discount = TextEditingController(text: (s?.discount ?? 0).toString());
     fixed = TextEditingController(text: (s?.fixed ?? 0).toString());
     fee = TextEditingController(
@@ -390,7 +394,7 @@ class _SaleFormState extends ConsumerState<SaleForm> {
   }
 
   Sale sale() => Sale(
-    id: widget.sale?.id ?? uuid.v4(),
+    id: saleId,
     date: date.toIso8601String(),
     lines: cart
         .map(
@@ -576,6 +580,7 @@ class _SaleFormState extends ConsumerState<SaleForm> {
             onPressed: busy
                 ? null
                 : () => action(c, () async {
+                    if (busy) return;
                     setState(() => busy = true);
                     try {
                       await ref.read(storeProvider).saveSale(sale());

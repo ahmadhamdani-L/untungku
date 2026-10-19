@@ -60,7 +60,8 @@ void main() {
     await tester.tap(find.text('Kopi Integrasi • stok 10').last);
     await tester.pumpAndSettle();
     await tester.enterText(find.widgetWithText(TextField, 'Jumlah'), '2');
-    tester.testTextInput.hide();
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
       find.text('Simpan penjualan').hitTestable(),
       250,

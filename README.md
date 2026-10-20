@@ -40,7 +40,7 @@ Artifact disimpan 14 hari. Build wajib gagal bila file APK tidak ada. Debug APK 
 
 ## AAB bertanda tangan
 
-AAB lokal source `6c87a28` berhasil dibangun dan diverifikasi: [hasil AAB](docs/aab-verification.json), [konfigurasi dan batas verifikasi](docs/ADMOB_RELEASE.md). Profil owner memakai App ID dan banner pemilik; live serving serta publikasi Play belum diverifikasi. GitHub App belum mendapat akses Actions Secrets (403), sehingga AAB remote belum dijalankan.
+AAB lokal kode versi 2, source `dea7489` berhasil dibangun dan diverifikasi: [hasil AAB](docs/aab-verification.json), [konfigurasi dan batas verifikasi](docs/ADMOB_RELEASE.md). Profil owner memakai App ID dan banner pemilik; live serving serta publikasi Play belum diverifikasi. GitHub App belum mendapat akses Actions Secrets (403), sehingga AAB remote belum dijalankan.
 
 Buat environment GitHub `release` dan isi secrets:
 

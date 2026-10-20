@@ -58,3 +58,7 @@ Salinan: `~/Downloads/UntungKu-Pro-1.0.0-release-6c87a28.aab`. Hash, ukuran dan 
 Dua hambatan lokal diselesaikan: menjalankan pub saat build untuk membersihkan registrasi plugin integration test dari release, serta memasang Android command-line tools resmi yang dibutuhkan Flutter untuk memeriksa debug symbols. APK debug arsip tidak digunakan sebagai AAB release.
 
 Kebijakan privasi kini tersedia di https://ddd-dream-develop-digital.vercel.app/untungku-pro/privacy/ setelah persetujuan publikasi pemilik; HTTP 200 dan konten HTML publik diperiksa. Pengelola PT DDD DREAM DEVELOP DIGITAL, pengembang Lelouch D, email publik hmdhmdndani@gmail.com. Source website commit `6b30138` pada repo `ddd-dream-develop-digital`. Kontak khusus Google tidak dimasukkan. Nama paket saat setup Play adalah **`id.untungku.untungku_pro`**. AAB kode versi 2 menyertakan kebijakan yang sama dalam aplikasi untuk akses offline. Hasil build berikutnya dicatat di `aab-verification.json`.
+
+## AAB final dengan kebijakan publik — kode versi 2
+
+Source `dea7489`, file `UntungKu-Pro-1.0.0-v2-release-dea7489.aab`, berhasil dibangun dengan Flutter release dan upload key yang sama. Bundletool validate dan jarsigner verify lulus; manifest kode versi 2 dan asset kebijakan yang sama dengan halaman publik diperiksa. 34 unit/widget test serta CI source final lulus. Gunakan file versi 2 ini untuk upload pertama yang menyertakan kebijakan offline. Status yang belum terverifikasi tetap live serving unit pemilik, consent wilayah EEA, dan penerimaan Play. Kode tidak dipublikasikan ke Play oleh agent.

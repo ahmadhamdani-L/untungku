@@ -1,26 +1,27 @@
 {
-  "verified_at_utc": "2026-10-20T12:40:02.919853+00:00",
-  "source_commit": "6c87a2850d1df3d1d8747a24bcc0d1f92e5f87af",
+  "verified_at_utc": "2026-10-20T12:47:30.044965+00:00",
+  "source_commit": "dea748980c824e6154ae198244143ae9453d318b",
   "package_name": "id.untungku.untungku_pro",
   "version_name": "1.0.0",
-  "version_code": 1,
+  "version_code": 2,
   "min_sdk": 24,
   "target_sdk": 36,
   "build_type": "release",
   "ad_profile": "config/admob-release.json",
   "local_aab": {
-    "filename": "UntungKu-Pro-1.0.0-release-6c87a28.aab",
-    "size_in_bytes": 65824937,
-    "sha256": "d47626e73055ef103c3756f3b6a0478c08a0abb5c6b161d3d97a5c3fd42749c0",
+    "filename": "UntungKu-Pro-1.0.0-v2-release-dea7489.aab",
+    "size_in_bytes": 66411774,
+    "sha256": "ade45e0ca6d541e5cfa05ee71b99ef0c0b454fdc57ea4e948caf72f459bd2f8e",
     "flutter_build_exit_code": 0,
     "bundletool_version": "1.18.3",
     "bundletool_validate": true,
     "jarsigner_verify": true,
     "certificate_sha256": "54BC4EE0815329CD03067FD65B069B1E496D244ACE5AFA213E5D42F51CBA5C33",
-    "elf_64bit_libraries_16kb_aligned": 8
+    "elf_64bit_libraries_16kb_aligned": 8,
+    "privacy_asset_matches_published_policy": true
   },
   "tests": {
-    "unit_widget_passed": 33,
+    "unit_widget_passed": 34,
     "release_guard_passed": 4,
     "google_test_banner_device_passed": 1,
     "owner_live_ads_verified": false,
@@ -29,13 +30,15 @@
   "github": {
     "aab_built_remotely": false,
     "reason": "GitHub App Actions Secrets API returned 403; signing secrets not configured by agent",
-    "source_quality_run": 39421430425,
-    "main_quality_run": 39421694093,
-    "main_debug_apk_run": 39421694089
+    "source_quality_run": 39424788394
   },
   "publication": {
     "uploaded_to_play": false,
-    "public_privacy_url": null,
-    "privacy_contact": "awaiting owner"
+    "public_privacy_url": "https://ddd-dream-develop-digital.vercel.app/untungku-pro/privacy/",
+    "privacy_contact": "hmdhmdndani@gmail.com",
+    "privacy_operator": "PT DDD DREAM DEVELOP DIGITAL",
+    "privacy_developer": "Lelouch D",
+    "privacy_website_source_commit": "6b30138",
+    "privacy_http_status": 200
   }
 }

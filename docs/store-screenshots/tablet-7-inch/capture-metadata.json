@@ -1,0 +1,37 @@
+{
+  "device_profile": "Nexus 7 2013",
+  "avd": "Untungku_Tablet_7",
+  "native_dimensions": [
+    1200,
+    1920
+  ],
+  "density_dpi": 320,
+  "android_api": 37,
+  "app_version": "1.0.0",
+  "version_code": 2,
+  "source_aab": "UntungKu-Pro-1.0.0-v2-release-dea7489.aab",
+  "capture": "actual Android screencap; opaque alpha removed only; no resize or crop",
+  "business_data": "empty; calculator simulation price 20000, cost 10000, quantity 1",
+  "files": [
+    {
+      "name": "01-dashboard.png",
+      "sha256": "6c2fb591edbc3655e7b5e5df93dbf78e743179a467c9342634922b77665b32dd"
+    },
+    {
+      "name": "02-products.png",
+      "sha256": "b3a6aa7311ba8c33b1a5830a86b72ba18c77a68160a63dfb3e5dd369088a6278"
+    },
+    {
+      "name": "03-transactions.png",
+      "sha256": "c966a592aad5688583883fe016e6654b2c666ce37d4d609412cd16fbba85aaf4"
+    },
+    {
+      "name": "04-calculator.png",
+      "sha256": "facd88e337e59d576d077c125229df192486b61d425074f618a746fbb2585426"
+    },
+    {
+      "name": "05-calculator-results.png",
+      "sha256": "058192640c44ad9eb70b1483fabbd85a2e5d2f73266ac0cd7e55d8530bee84fe"
+    }
+  ]
+}

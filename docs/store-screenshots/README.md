@@ -11,3 +11,5 @@ Tujuh PNG RGB 1080 × 1920, diambil dari aplikasi Android berjalan. Tool `tool/c
 7. Dashboard tema gelap.
 
 Tidak ada transaksi contoh yang disisipkan ke database produksi. Gambar ini merupakan bahan listing, bukan klaim bahwa aplikasi telah diterima Play. Ikon dan feature graphic berada di `assets/branding`. Pemilik perlu meninjau listing dan kebijakan sebelum publikasi.
+
+Screenshot tablet 7 inci tersedia terpisah di [tablet-7-inch](tablet-7-inch/README.md): lima PNG 1200 × 1920 dari emulator Nexus 7, aplikasi release kode 2. Gunakan untuk kolom tablet 7 inci, bukan screenshot ponsel yang dibesarkan.

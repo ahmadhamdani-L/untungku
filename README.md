@@ -28,6 +28,8 @@ Database tersimpan di application support. Uninstall bisa menghapus semua data l
 
 ## Unduh APK dari GitHub
 
+Build source `0597f97` sudah berhasil dan artifact APK terkonfirmasi: [buka hasil build](https://github.com/ahmadhamdani-L/untungku/actions/runs/39417669228). Rincian ukuran/hash dan masa berlaku ada di [bukti build](docs/build-verification.json).
+
 1. Buka repository → **Actions → Android debug APK**.
 2. Pilih **Run workflow**, pilih `main` atau `develop`, lalu jalankan (push ke `main` juga memicu build).
 3. Tunggu status **Success** pada commit yang diinginkan.

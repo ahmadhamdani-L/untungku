@@ -1,0 +1,28 @@
+{
+  "verified_at_utc": "2026-10-20T11:56:38.581661+00:00",
+  "source_commit": "0597f974ee436ac9f4fabb4947737c4f34ff835e",
+  "github_run": {
+    "id": 39417669228,
+    "url": "https://github.com/ahmadhamdani-L/untungku/actions/runs/39417669228",
+    "conclusion": "success"
+  },
+  "artifact": {
+    "id": 12262766040,
+    "name": "untungku-android-debug-apk",
+    "size_in_bytes": 92640904,
+    "digest": "sha256:500ad87e0f89a160d3a538cae6ab15dcae5287f15264fb0735f5a68c4e2d67c4",
+    "expires_at": "2026-11-03T11:55:20Z",
+    "expired": false
+  },
+  "local_apk": {
+    "name": "UntungKu-Pro-1.0.0-debug-0597f97.apk",
+    "size_in_bytes": 216616737,
+    "sha256": "658a4dc2a7c93af3ccb841bcd13f55017896082781bcbf1c3f9a4aafcfc7ab79",
+    "signature_verified": true
+  },
+  "tests": {
+    "unit_widget_passed": 33,
+    "android_integration_passed": 1
+  },
+  "note": "GitHub artifact digest identifies ZIP, local hash identifies independently built APK. Debug signing; not a Play release."
+}

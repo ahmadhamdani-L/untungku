@@ -268,7 +268,7 @@ class _SettingsState extends ConsumerState<SettingsPage> {
             leading: Icon(Icons.privacy_tip_outlined),
             title: Text('Privasi & penyimpanan'),
             subtitle: Text(
-              'Tidak ada akun wajib, analitik, atau server bisnis. Ekspor berisi informasi usaha Anda. Iklan dinonaktifkan pada build pengembangan.',
+              'Tidak ada akun wajib, analitik, atau server bisnis. Ekspor berisi informasi usaha Anda. Pada versi beriklan, Google memproses data iklan sesuai pilihan privasi Anda; data transaksi tetap tersimpan di perangkat.',
             ),
           ),
           const OptionalAdBanner(),

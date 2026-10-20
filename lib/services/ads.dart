@@ -81,7 +81,7 @@ class GoogleAdsService implements AdsService {
 
   @override
   Future<BannerAd?> loadBanner() async {
-    if (!ready) {
+    if (!ready || !await ConsentInformation.instance.canRequestAds()) {
       return null;
     }
     final result = Completer<BannerAd?>();
@@ -211,6 +211,7 @@ class OptionalAdBanner extends StatefulWidget {
 
 class _OptionalAdBannerState extends State<OptionalAdBanner> {
   BannerAd? banner;
+  bool privacyRequired = false;
   @override
   void initState() {
     super.initState();
@@ -231,8 +232,35 @@ class _OptionalAdBannerState extends State<OptionalAdBanner> {
       }
       setState(() => banner = result);
     } catch (_) {
-      /* Advertising failures must never interrupt business functions. */
+      // Business functions remain available when advertising fails.
+    } finally {
+      // Privacy choices must not depend on whether an ad filled successfully.
+      try {
+        final required = await ConsentInformation.instance
+            .getPrivacyOptionsRequirementStatus();
+        if (mounted) {
+          setState(
+            () => privacyRequired =
+                required == PrivacyOptionsRequirementStatus.required,
+          );
+        }
+      } catch (_) {
+        // A missing platform response must not interrupt the business screen.
+      }
     }
+  }
+
+  void showPrivacy() {
+    // Remove the old ad before a changed consent decision can take effect.
+    setState(() {
+      banner?.dispose();
+      banner = null;
+    });
+    ConsentForm.showPrivacyOptionsForm((error) {
+      if (mounted && error == null) {
+        unawaited(load());
+      }
+    });
   }
 
   @override
@@ -242,20 +270,22 @@ class _OptionalAdBannerState extends State<OptionalAdBanner> {
   }
 
   @override
-  Widget build(BuildContext context) => banner == null
-      ? const SizedBox.shrink()
-      : Column(
-          children: [
-            const SizedBox(height: 16),
-            SizedBox(
-              width: banner!.size.width.toDouble(),
-              height: banner!.size.height.toDouble(),
-              child: AdWidget(ad: banner!),
-            ),
-            TextButton(
-              onPressed: () => ConsentForm.showPrivacyOptionsForm((error) {}),
-              child: const Text('Pilihan privasi iklan'),
-            ),
-          ],
-        );
+  Widget build(BuildContext context) => Column(
+    children: [
+      if (banner != null) ...[
+        const SizedBox(height: 16),
+        const Text('Iklan'),
+        SizedBox(
+          width: banner!.size.width.toDouble(),
+          height: banner!.size.height.toDouble(),
+          child: AdWidget(ad: banner!),
+        ),
+      ],
+      if (privacyRequired)
+        TextButton(
+          onPressed: showPrivacy,
+          child: const Text('Pilihan privasi iklan'),
+        ),
+    ],
+  );
 }

@@ -20,7 +20,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        // Stable package ID used for Play and future updates.
         applicationId = "id.untungku.untungku_pro"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
@@ -33,7 +33,7 @@ android {
 
     signingConfigs {
         create("production") {
-            val signingFile = file("release.jks")
+            val signingFile = file(System.getenv("ANDROID_KEYSTORE_PATH") ?: "release.jks")
             if (signingFile.exists()) {
                 storeFile = signingFile
                 storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
@@ -44,8 +44,7 @@ android {
     }
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // Releases require the owner upload key; never fall back to debug signing.
             signingConfig = signingConfigs.getByName("production")
         }
     }

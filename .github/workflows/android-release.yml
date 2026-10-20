@@ -7,6 +7,15 @@ on:
         type: boolean
         required: true
         default: false
+      ad_profile:
+        description: 'Ad profile (owner uses supplied IDs; no automatic full-screen ads)'
+        type: choice
+        options: [offline, google-test, owner]
+        default: offline
+      confirm_owner_ads:
+        description: 'Use owner IDs; account/consent setup and device validation still require owner review'
+        type: boolean
+        default: false
 permissions:
   contents: read
 jobs:
@@ -16,6 +25,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 35
     env:
+      AD_CONFIG_PATH: ${{ inputs.ad_profile == 'owner' && 'config/admob-release.json' || inputs.ad_profile == 'google-test' && 'config/google-test.json' || 'config/development.json' }}
+      CONFIRM_OWNER_ADS: ${{ inputs.confirm_owner_ads }}
       ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
       ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
       ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -23,6 +34,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 tool/validate_release.py
+      - name: Set Android AdMob app ID from selected profile
+        shell: python
+        run: |
+          import json,os
+          config=json.load(open(os.environ['AD_CONFIG_PATH']))
+          app_id=config.get('ADMOB_ANDROID_APP_ID','ca-app-pub-3940256099942544~3347511713')
+          with open(os.environ['GITHUB_ENV'],'a') as output:
+              output.write('ADMOB_ANDROID_APP_ID='+app_id+'\n')
       - name: Prepare signing material
         shell: python
         run: |
@@ -38,9 +57,10 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get --enforce-lockfile
+      - run: python3 -m unittest discover -s tool -p "test_*.py"
       - run: flutter analyze
       - run: flutter test
-      - run: flutter build appbundle --release --dart-define=ADMOB_ENABLED=false --dart-define=ADMOB_USE_MOCK=true
+      - run: flutter build appbundle --release --dart-define-from-file="$AD_CONFIG_PATH"
       - run: test -s build/app/outputs/bundle/release/app-release.aab
       - uses: actions/upload-artifact@v4
         with:

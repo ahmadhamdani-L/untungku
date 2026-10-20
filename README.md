@@ -47,13 +47,13 @@ Buat environment GitHub `release` dan isi secrets:
 - `ANDROID_KEY_ALIAS`
 - `ANDROID_KEY_PASSWORD`
 
-Jalankan **Signed Android AAB**, centang konfirmasi. Workflow memvalidasi secrets, menjalankan analisis dan tes, membangun AAB bertanda tangan, dan menyimpan artifact 7 hari. Tidak ada keystore, password, atau token di repository. Tidak ada fallback ke debug signing. Workflow tidak mempublikasikan aplikasi ke Play. Tanpa secrets, workflow gagal dengan jelas.
+Jalankan **Signed Android AAB**, centang konfirmasi. Pilih profil `offline`, `google-test`, atau `owner` (ID AdMob pemilik; perlu centang `confirm_owner_ads`). Workflow memvalidasi secrets dan profil, menjalankan analisis dan tes, membangun AAB bertanda tangan, dan menyimpan artifact 7 hari. Tidak ada keystore, password, atau token di repository. Tidak ada fallback ke debug signing. Workflow tidak mempublikasikan aplikasi ke Play. Tanpa secrets, workflow gagal dengan jelas.
 
 ## Konfigurasi iklan
 
 `.env.example` hanya dokumentasi, **tidak otomatis dimuat Flutter**. Konfigurasi Dart menggunakan `--dart-define` atau `--dart-define-from-file`. Default `ADMOB_ENABLED=false`, `ADMOB_USE_MOCK=true`; startup tidak menginisialisasi Google SDK. `MockAdsService` menghasilkan loading/loaded/rewarded/dismissed atau failed secara deterministik tanpa koneksi iklan.
 
-Gradle menerima `ADMOB_ANDROID_APP_ID` dari environment proses build untuk placeholder Android manifest. Default adalah ID aplikasi contoh resmi Google. Environment host tidak otomatis menjadi nilai Dart. Adapter banner/interstitial/rewarded memakai ID test resmi secara default; banner opsional berada di akhir pengaturan, dan interstitial/rewarded tidak dipasang pada alur transaksi. Adapter UMP meminta persetujuan sebelum SDK aktif dan menyediakan pilihan privasi. Integrasi iklan nyata belum diverifikasi pada perangkat. Build produksi beriklan diblokir oleh validator rilis sampai integrasi itu diverifikasi pada perangkat. Semua fitur bisnis tetap tersedia tanpa iklan.
+Gradle menerima `ADMOB_ANDROID_APP_ID` dari environment proses build untuk placeholder Android manifest. Default adalah ID aplikasi contoh resmi Google. Environment host tidak otomatis menjadi nilai Dart. Adapter banner/interstitial/rewarded memakai ID test resmi secara default; banner opsional berada di akhir pengaturan, dan interstitial/rewarded tidak dipasang pada alur transaksi. Adapter UMP meminta persetujuan sebelum SDK aktif dan menyediakan pilihan privasi. Integrasi iklan nyata belum diverifikasi pada perangkat. Profil owner sekarang tersedia atas permintaan pemilik; penggunaannya memerlukan konfirmasi eksplisit pada workflow. Live serving dan pesan consent akun pemilik tetap perlu verifikasi sebelum publikasi. Semua fitur bisnis tetap tersedia tanpa iklan.
 
 ## Branch dan verifikasi
 
@@ -74,3 +74,5 @@ ADMOB_ANDROID_APP_ID='ca-app-pub-3940256099942544~3347511713' flutter run --dart
 Banner hanya dimuat setelah persetujuan memungkinkan permintaan iklan. Gunakan menu pengaturan untuk penempatan test. Kegagalan iklan tidak menghalangi pencatatan bisnis. Tidak ada penempatan interstitial/rewarded otomatis pada tombol transaksi. Tidak ada klaim pendapatan dari iklan mock/test.
 
 Kebijakan stok: default menolak penjualan jika stok tidak cukup. Pengaturan **Izinkan stok minus** memerlukan konfirmasi dan mencatat unit yang belum tersedia sebagai stok negatif. Penuhi stok tersebut sebelum menonaktifkan kebijakan ini. Backup menyimpan kebijakan dan memvalidasi saldo ledger.
+
+Konfigurasi ID AdMob pemilik, penempatan yang tersedia, signing lokal dan kebutuhan izin GitHub: [docs/ADMOB_RELEASE.md](docs/ADMOB_RELEASE.md). Laporan APK sebelumnya merekam source lama; hasil AAB terbaru dicatat terpisah.

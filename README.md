@@ -2,6 +2,8 @@
 
 Aplikasi Android offline berbahasa Indonesia untuk UMKM: produk, stok, penjualan banyak barang, pengeluaran, kalkulator laba, dashboard, CSV, dan backup JSON. Tidak membutuhkan login atau backend. Data produksi awal kosong.
 
+Hasil pengujian dan batas verifikasi: [docs/VERIFICATION.md](docs/VERIFICATION.md). Screenshot aplikasi: [galeri listing](docs/store-screenshots/README.md).
+
 ## Pengembangan
 
 Gunakan Flutter **3.47.7 stable**, Dart bawaan Flutter, Java 17, dan Android SDK. Dependensi dikunci di `pubspec.lock`.
@@ -32,7 +34,7 @@ Database tersimpan di application support. Uninstall bisa menghapus semua data l
 4. Buka run tersebut → **Artifacts → untungku-android-debug-apk**.
 5. Unduh ZIP, ekstrak `app-debug.apk`, lalu instal pada perangkat Android pengujian. Android dapat meminta izin instalasi dari sumber tersebut.
 
-Artifact disimpan 14 hari. Build wajib gagal bila file APK tidak ada. Debug APK menggunakan debug signing dan bukan rilis Play Store.
+Artifact disimpan 14 hari. Build wajib gagal bila file APK tidak ada. Debug APK menggunakan debug signing dan bukan rilis Play Store. Signature debug lokal dan CI bisa berbeda; ekspor backup sebelum uninstall atau berganti sumber build. Identitas signing rilis memerlukan keystore pemilik yang konsisten.
 
 ## AAB bertanda tangan
 

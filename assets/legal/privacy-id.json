@@ -1,0 +1,49 @@
+{
+  "title": "Kebijakan Privasi UntungKu Pro",
+  "updated": "20 Oktober 2026",
+  "operator": "PT DDD DREAM DEVELOP DIGITAL",
+  "developer": "Lelouch D",
+  "email": "hmdhmdndani@gmail.com",
+  "sections": [
+    {
+      "title": "Tentang aplikasi dan pengelola",
+      "text": "UntungKu Pro adalah aplikasi Android untuk pencatatan produk, stok, penjualan, pengeluaran, dan perhitungan laba usaha. Aplikasi dikelola oleh PT DDD DREAM DEVELOP DIGITAL dengan nama pengembang Lelouch D. Kebijakan ini menjelaskan penyimpanan data usaha di perangkat dan pemrosesan data oleh layanan iklan pada versi beriklan. Aplikasi tidak mewajibkan pembuatan akun."
+    },
+    {
+      "title": "Data usaha yang Anda masukkan",
+      "text": "Nama usaha, produk, harga, stok, transaksi, pengeluaran, catatan, dan preferensi disimpan secara lokal di penyimpanan aplikasi pada perangkat Anda. Aplikasi tidak memiliki server bisnis untuk menerima database tersebut dan tidak mengirim isi transaksi ke AdMob untuk permintaan iklan. Perhitungan laba dan pencatatan usaha dapat berjalan tanpa internet. Kami tidak memperoleh akses jarak jauh ke database lokal Anda."
+    },
+    {
+      "title": "Backup, ekspor, dan data yang Anda bagikan",
+      "text": "Backup JSON dan ekspor CSV hanya dibuat ketika Anda memilih fitur tersebut. Lokasi penyimpanan dipilih melalui pemilih berkas Android. Berkas dapat memuat informasi usaha dan tidak dienkripsi oleh fitur ekspor aplikasi. Simpan dengan aman. Jika Anda memilih penyedia penyimpanan cloud, mengirim berkas, atau membagikannya kepada orang lain, penanganan salinan tersebut mengikuti layanan atau penerima yang Anda pilih. Restore mengganti data lokal setelah konfirmasi dan membuat salinan pemulihan internal."
+    },
+    {
+      "title": "Iklan Google AdMob dan data perangkat",
+      "text": "Versi beriklan menggunakan Google Mobile Ads (AdMob) untuk menampilkan banner pada halaman Pengaturan. SDK Google dapat mengumpulkan atau memproses informasi perangkat dan aplikasi, alamat IP dan perkiraan lokasi yang diturunkan dari IP, pengenal yang tersedia, interaksi iklan, serta data diagnostik untuk penayangan, pengukuran, keamanan, dan pencegahan penyalahgunaan iklan. Data tersebut diproses oleh Google dan mitra periklanan sesuai konfigurasi layanan, wilayah, dan pilihan privasi pengguna. Aplikasi tidak mengirimkan isi database usaha sebagai bagian dari permintaan iklan. Build offline/mock tidak melakukan permintaan iklan Google."
+    },
+    {
+      "title": "Persetujuan dan pilihan privasi iklan",
+      "text": "Sebelum meminta iklan, aplikasi menggunakan Google User Messaging Platform (UMP) untuk memeriksa status persetujuan dan menampilkan pesan jika diwajibkan serta tersedia pada konfigurasi akun. Permintaan iklan hanya dilakukan ketika UMP mengizinkan. Jika diwajibkan UMP, tombol Pilihan privasi iklan tersedia di Pengaturan agar Anda dapat meninjau atau mengubah pilihan. Gagal memuat iklan atau tidak diizinkannya permintaan iklan tidak menghalangi fitur pencatatan usaha. Pengaturan privasi perangkat juga dapat memengaruhi data yang tersedia bagi SDK."
+    },
+    {
+      "title": "Kontak dengan pengelola",
+      "text": "Jika Anda mengirim email kepada kami, kami menerima alamat email, isi pesan, dan lampiran yang Anda kirim secara sukarela untuk menangani pertanyaan, dukungan, atau permintaan privasi. Jangan mengirim password, kunci penandatanganan, atau backup berisi informasi sensitif yang tidak diperlukan. Kami tidak menjual isi data usaha yang Anda kirim kepada kami."
+    },
+    {
+      "title": "Penyimpanan, retensi, dan penghapusan",
+      "text": "Data usaha lokal disimpan sampai Anda mengubah atau menghapusnya menggunakan fungsi yang tersedia, menghapus data aplikasi melalui pengaturan Android, atau menghapus instalasi aplikasi. Pembatalan penjualan mempertahankan catatan pembatalan dan menyesuaikan stok; mengarsipkan produk tidak menghapus riwayatnya. Untuk menghapus seluruh database lokal, gunakan Hapus data aplikasi atau uninstall. Backup Android otomatis dinonaktifkan oleh aplikasi. Salinan JSON/CSV yang Anda ekspor tetap berada di lokasi pilihan Anda dan harus dihapus terpisah. Penghapusan lokal tidak otomatis menghapus data yang telah diproses oleh Google atau salinan di layanan lain. Retensi data iklan mengikuti kebijakan Google; pesan dukungan disimpan selama diperlukan untuk penanganan pertanyaan dan kewajiban yang berlaku."
+    },
+    {
+      "title": "Keamanan dan kendali Anda",
+      "text": "Penyimpanan internal aplikasi menggunakan perlindungan akses sistem Android. Keamanan perangkat, kunci layar, dan lokasi backup merupakan bagian penting perlindungan data Anda. Aplikasi tidak menjanjikan enkripsi database atau keamanan mutlak. Anda dapat meninjau data usaha di aplikasi, mengekspor backup, dan menghapus data lokal. Hubungi kami untuk pertanyaan atau permintaan terkait data yang Anda kirim melalui email; kami tidak dapat menghapus database dari perangkat Anda secara jarak jauh."
+    },
+    {
+      "title": "Layanan pihak ketiga dan perubahan kebijakan",
+      "text": "Pemrosesan data oleh Google dijelaskan lebih lanjut di https://policies.google.com/privacy dan https://policies.google.com/technologies/ads. Kebijakan penyedia penyimpanan pilihan Anda berlaku saat Anda menggunakan layanannya. Halaman web kebijakan ini disediakan melalui hosting situs perusahaan; penyedia hosting dapat memproses informasi koneksi dan log akses untuk melayani serta mengamankan halaman. Kebijakan ini dapat diperbarui bila fungsi atau pemrosesan data aplikasi berubah. Tanggal pembaruan ditampilkan di bagian atas."
+    },
+    {
+      "title": "Hubungi kami",
+      "text": "Pengelola: PT DDD DREAM DEVELOP DIGITAL. Nama pengembang di Google Play: Lelouch D. Pertanyaan privasi dan bantuan: hmdhmdndani@gmail.com. Situs perusahaan: https://ddd-dream-develop-digital.vercel.app/."
+    }
+  ]
+}

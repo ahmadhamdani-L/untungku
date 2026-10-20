@@ -264,11 +264,18 @@ class _SettingsState extends ConsumerState<SettingsPage> {
                   }),
           ),
           const Divider(),
-          const ListTile(
-            leading: Icon(Icons.privacy_tip_outlined),
-            title: Text('Privasi & penyimpanan'),
-            subtitle: Text(
-              'Tidak ada akun wajib, analitik, atau server bisnis. Ekspor berisi informasi usaha Anda. Pada versi beriklan, Google memproses data iklan sesuai pilihan privasi Anda; data transaksi tetap tersimpan di perangkat.',
+          ListTile(
+            leading: const Icon(Icons.privacy_tip_outlined),
+            title: const Text('Kebijakan privasi'),
+            subtitle: const Text(
+              'Data usaha, backup, iklan, dan kontak pengelola. Bisa dibaca offline.',
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.push(
+              c,
+              MaterialPageRoute<void>(
+                builder: (_) => const PrivacyPolicyPage(),
+              ),
             ),
           ),
           const OptionalAdBanner(),

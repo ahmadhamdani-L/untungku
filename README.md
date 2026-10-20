@@ -61,7 +61,7 @@ Gradle menerima `ADMOB_ANDROID_APP_ID` dari environment proses build untuk place
 
 `main` untuk hasil stabil, `develop` untuk integrasi, `feature/*` untuk pekerjaan. Perubahan digabung setelah pemeriksaan relevan lulus. Tidak menggunakan force push. CI memeriksa format, analisis, unit/widget test, dan coverage. Tes integrasi perangkat dijalankan terpisah dengan perintah di atas; tidak diklaim dijalankan oleh CI unit test.
 
-Arsitektur, rumus, pembatalan, stok, dan batas schema ada di [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Kebijakan privasi draf: [docs/PRIVACY.md](docs/PRIVACY.md). Kesiapan Play: [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md).
+Arsitektur, rumus, pembatalan, stok, dan batas schema ada di [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Kebijakan privasi: [docs/PRIVACY.md](docs/PRIVACY.md). Kesiapan Play: [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md).
 
 ## Identitas visual
 
@@ -80,3 +80,5 @@ Kebijakan stok: default menolak penjualan jika stok tidak cukup. Pengaturan **Iz
 Konfigurasi ID AdMob pemilik, penempatan yang tersedia, signing lokal dan kebutuhan izin GitHub: [docs/ADMOB_RELEASE.md](docs/ADMOB_RELEASE.md). Laporan APK sebelumnya merekam source lama; hasil AAB terbaru dicatat terpisah.
 
 Baru membuat aplikasi di Play Console? Lihat [panduan upload pertama dan nama paket](docs/PLAY_FIRST_UPLOAD.md).
+
+Kebijakan privasi publik: https://ddd-dream-develop-digital.vercel.app/untungku-pro/privacy/ (juga dapat dibaca offline dari Pengaturan). Versi 1.0.0 kode 2 menyertakan identitas dan kontak pengelola yang sama.

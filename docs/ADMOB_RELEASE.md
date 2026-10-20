@@ -46,3 +46,15 @@ flutter test integration_test/google_ads_test.dart -d emulator-5554 \
 Tes meminta banner Google contoh sesudah UMP; tidak memakai ID produksi pemilik. Tidak mengeklik iklan. Catat hasil sebenarnya di laporan AAB; kegagalan jaringan/konfigurasi consent tidak boleh dilaporkan sebagai lulus.
 
 Referensi diperiksa 20 Oktober 2026: [Google UMP](https://developers.google.com/admob/flutter/privacy), [Google test ads](https://developers.google.com/admob/flutter/test-ads), [Flutter Android signing](https://docs.flutter.dev/deployment/android).
+
+## Hasil build lokal terverifikasi — 20 Oktober 2026
+
+Source `6c87a28`: Flutter `build appbundle --release` selesai dengan exit code 0; AAB release ditandatangani upload key baru, cocok dengan sertifikat key tersebut, dan lolos `jarsigner verify` serta `bundletool 1.18.3 validate`. Package dan App ID AdMob pemilik diperiksa di manifest; banner ID pemilik diperiksa pada kode ARM64. Delapan library native 64-bit memiliki ELF LOAD alignment minimal 16 KB.
+
+Salinan: `~/Downloads/UntungKu-Pro-1.0.0-release-6c87a28.aab`. Hash, ukuran dan fingerprint publik ada di [aab-verification.json](aab-verification.json). Tidak ada kunci privat/password di repository.
+
+33 unit/widget test, empat tes pengaman release, dan satu tes perangkat Google test banner/UMP lulus. Live serving unit pemilik, formulir consent wilayah EEA, dan penerimaan Play belum diverifikasi. AAB ini dibuat lokal; tidak diklaim sebagai artifact AAB GitHub. CI main dan build APK debug GitHub source yang sama sudah berhasil.
+
+Dua hambatan lokal diselesaikan: menjalankan pub saat build untuk membersihkan registrasi plugin integration test dari release, serta memasang Android command-line tools resmi yang dibutuhkan Flutter untuk memeriksa debug symbols. APK debug arsip tidak digunakan sebagai AAB release.
+
+Kebijakan privasi publik dan kontak pemilik belum tersedia; nama paket saat setup Play adalah **`id.untungku.untungku_pro`**. Jangan mempublikasikan listing dengan URL contoh atau link repository private. Pilihan privasi dalam aplikasi masih perlu diselaraskan dengan halaman publik final setelah URL/kontak diberikan.

@@ -82,3 +82,5 @@ Konfigurasi ID AdMob pemilik, penempatan yang tersedia, signing lokal dan kebutu
 Baru membuat aplikasi di Play Console? Lihat [panduan upload pertama dan nama paket](docs/PLAY_FIRST_UPLOAD.md).
 
 Kebijakan privasi publik: https://ddd-dream-develop-digital.vercel.app/untungku-pro/privacy/ (juga dapat dibaca offline dari Pengaturan). Versi 1.0.0 kode 2 menyertakan identitas dan kontak pengelola yang sama.
+
+Panduan semua urutan Dasbor Play Console dan teks listing siap salin: [docs/PLAY_CONSOLE_SETUP_ID.md](docs/PLAY_CONSOLE_SETUP_ID.md).

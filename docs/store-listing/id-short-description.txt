@@ -1,0 +1,1 @@
+Catat penjualan, kelola stok, dan hitung laba usaha secara offline.

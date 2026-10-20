@@ -1,0 +1,7 @@
+<id>
+Rilis awal UntungKu Pro.
+• Pencatatan produk, stok, penjualan, dan pengeluaran.
+• Dashboard serta kalkulator estimasi laba.
+• Ekspor CSV, backup dan pemulihan JSON.
+• Tema terang/gelap dan kebijakan privasi yang dapat dibaca offline.
+</id>

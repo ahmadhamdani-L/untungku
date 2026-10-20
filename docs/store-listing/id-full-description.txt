@@ -1,0 +1,28 @@
+UntungKu Pro membantu pemilik UMKM mencatat kegiatan usaha, memantau stok, dan memahami perhitungan laba dari satu aplikasi berbahasa Indonesia.
+
+Pencatatan usaha dapat digunakan offline tanpa membuat akun. Data usaha tersimpan di perangkat Anda.
+
+FITUR UTAMA
+• Kelola produk, SKU, kategori, harga, dan modal.
+• Pantau stok serta catat koreksi stok dengan alasan.
+• Catat penjualan dengan beberapa produk dalam satu transaksi.
+• Simpan metode pembayaran, diskon, biaya, dan catatan transaksi.
+• Revisi atau batalkan penjualan dengan penyesuaian stok.
+• Catat dan kelola pengeluaran usaha.
+• Lihat ringkasan pendapatan, estimasi laba, produk terlaris, dan stok menipis berdasarkan data yang dicatat.
+• Gunakan kalkulator untuk simulasi harga jual, margin, markup, dan target laba.
+• Ekspor transaksi ke CSV dan simpan backup JSON.
+• Pulihkan backup melalui konfirmasi dalam aplikasi.
+• Pilih tema terang, gelap, atau mengikuti perangkat.
+
+DATA DAN BACKUP
+Lakukan backup secara berkala dan simpan di tempat yang aman. Menghapus data aplikasi, menghapus instalasi, atau kehilangan perangkat dapat menghilangkan catatan lokal. Salinan backup yang diekspor berada di lokasi yang Anda pilih.
+
+IKLAN
+Versi ini menyertakan banner Google AdMob pada halaman Pengaturan. Iklan membutuhkan koneksi internet dan mengikuti pemeriksaan pilihan privasi. Fitur pencatatan usaha tetap dapat digunakan ketika iklan tidak tersedia.
+
+Perhitungan laba merupakan estimasi berdasarkan data dan biaya yang Anda masukkan. Periksa kembali catatan agar sesuai dengan kegiatan usaha Anda.
+
+Dikembangkan oleh Lelouch D — PT DDD DREAM DEVELOP DIGITAL.
+Dukungan: hmdhmdndani@gmail.com
+Kebijakan privasi: https://ddd-dream-develop-digital.vercel.app/untungku-pro/privacy/

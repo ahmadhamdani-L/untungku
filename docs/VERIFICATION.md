@@ -1,4 +1,6 @@
-# Verifikasi UntungKu Pro
+# Verifikasi APK offline UntungKu Pro (arsip)
+
+Laporan ini merekam APK offline sebelum konfigurasi AdMob owner. Hasil AAB berikutnya ada di [ADMOB_RELEASE.md](ADMOB_RELEASE.md) dan `aab-verification.json`; status iklan/signing di bawah adalah status saat APK arsip diuji.
 
 Tanggal pemeriksaan akhir: 20 Oktober 2026. Source aplikasi: `0597f974ee436ac9f4fabb4947737c4f34ff835e`. Commit dokumentasi sesudahnya tidak mengubah aplikasi.
 

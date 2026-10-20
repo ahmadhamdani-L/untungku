@@ -26,6 +26,8 @@ env.update({
     'ADMOB_ANDROID_APP_ID': config.get('ADMOB_ANDROID_APP_ID', 'ca-app-pub-3940256099942544~3347511713'),
 })
 subprocess.run(['python3', 'tool/validate_release.py'], env=env, check=True)
-subprocess.run(['flutter', 'build', 'appbundle', '--release', '--no-pub',
+# Keep pub enabled: Flutter must regenerate release-only plugin registration
+# after integration tests (dev plugins must not leak into the release).
+subprocess.run(['flutter', 'build', 'appbundle', '--release',
                 '--dart-define-from-file=' + profile], env=env, check=True)
 print('Signed AAB: build/app/outputs/bundle/release/app-release.aab')

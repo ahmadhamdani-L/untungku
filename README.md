@@ -76,3 +76,5 @@ Banner hanya dimuat setelah persetujuan memungkinkan permintaan iklan. Gunakan m
 Kebijakan stok: default menolak penjualan jika stok tidak cukup. Pengaturan **Izinkan stok minus** memerlukan konfirmasi dan mencatat unit yang belum tersedia sebagai stok negatif. Penuhi stok tersebut sebelum menonaktifkan kebijakan ini. Backup menyimpan kebijakan dan memvalidasi saldo ledger.
 
 Konfigurasi ID AdMob pemilik, penempatan yang tersedia, signing lokal dan kebutuhan izin GitHub: [docs/ADMOB_RELEASE.md](docs/ADMOB_RELEASE.md). Laporan APK sebelumnya merekam source lama; hasil AAB terbaru dicatat terpisah.
+
+Baru membuat aplikasi di Play Console? Lihat [panduan upload pertama dan nama paket](docs/PLAY_FIRST_UPLOAD.md).

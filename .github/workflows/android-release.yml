@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       confirm_signed_build:
-        description: 'Build a signed bundle for owner review (does not publish to Play)'
+        description: 'Build with the existing owner upload key'
         type: boolean
         required: true
         default: false
@@ -16,6 +16,18 @@ on:
         description: 'Use owner IDs; account/consent setup and device validation still require owner review'
         type: boolean
         default: false
+      publish_to_play:
+        description: 'Upload and release the signed owner build to Google Play'
+        type: boolean
+        default: false
+      play_track:
+        description: 'Google Play destination track'
+        type: choice
+        options: [internal, production]
+        default: internal
+concurrency:
+  group: android-release
+  cancel-in-progress: false
 permissions:
   contents: read
 jobs:
@@ -34,6 +46,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 tool/validate_release.py
+      - name: Validate Play publication settings
+        if: inputs.publish_to_play
+        env:
+          PLAY_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        shell: python
+        run: |
+          import json, os
+          if '${{ inputs.ad_profile }}' != 'owner':
+              raise SystemExit('Play publication requires the owner ad profile')
+          credentials = json.loads(os.environ['PLAY_SERVICE_ACCOUNT'] or '{}')
+          if not credentials.get('client_email') or not credentials.get('private_key'):
+              raise SystemExit('Missing GOOGLE_PLAY_SERVICE_ACCOUNT_JSON release secret')
       - name: Set Android AdMob app ID from selected profile
         shell: python
         run: |
@@ -60,6 +84,7 @@ jobs:
       - run: python3 -m unittest discover -s tool -p "test_*.py"
       - run: flutter analyze
       - run: flutter test
+      - run: flutter test test/ads_consent_test.dart --dart-define=ADMOB_ENABLED=true --dart-define=ADMOB_USE_MOCK=false
       - run: flutter build appbundle --release --dart-define-from-file="$AD_CONFIG_PATH"
       - run: test -s build/app/outputs/bundle/release/app-release.aab
       - uses: actions/upload-artifact@v4
@@ -68,5 +93,15 @@ jobs:
           path: build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 7
+      - name: Publish signed bundle to Google Play
+        if: inputs.publish_to_play
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: id.untungku.untungku_pro
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          tracks: ${{ inputs.play_track }}
+          status: completed
+          whatsNewDirectory: docs/store-listing/whatsnew
       - if: always()
         run: rm -f android/app/release.jks

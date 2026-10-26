@@ -278,10 +278,10 @@ class _SettingsState extends ConsumerState<SettingsPage> {
               ),
             ),
           ),
-          const OptionalAdBanner(),
+          const AdPrivacyOptions(),
           const ListTile(
             leading: Icon(Icons.info_outline),
-            title: Text('UntungKu Pro 1.0.0'),
+            title: Text('UntungKu Pro 1.0.1'),
             subtitle: Text(
               'Estimasi laba bukan nasihat keuangan. Retur parsial: revisi transaksi. Pembatalan penuh mengembalikan stok. Stok minus ditolak secara default dan hanya diizinkan melalui pengaturan eksplisit.',
             ),

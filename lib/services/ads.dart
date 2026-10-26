@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
@@ -44,6 +45,7 @@ class MockAdsService implements AdsService {
 
 class GoogleAdsService implements AdsService {
   bool ready = false;
+  Future<void>? _initializing;
   final String rewardedId;
   GoogleAdsService({
     this.rewardedId = const String.fromEnvironment(
@@ -52,7 +54,13 @@ class GoogleAdsService implements AdsService {
     ),
   });
   @override
-  Future<void> initialize() async {
+  Future<void> initialize() =>
+      _initializing ??= _initialize().catchError((Object error) {
+        _initializing = null;
+        throw error;
+      });
+
+  Future<void> _initialize() async {
     if (!const bool.fromEnvironment('ADMOB_ENABLED') ||
         const bool.fromEnvironment('ADMOB_USE_MOCK', defaultValue: true)) {
       throw StateError('Live ads disabled');
@@ -71,7 +79,17 @@ class GoogleAdsService implements AdsService {
       },
       (error) => consent.completeError(StateError(error.message)),
     );
-    await consent.future;
+    try {
+      await consent.future;
+    } catch (error) {
+      // UMP can still allow requests using a previous session's decision.
+      debugPrint('AdMob consent update failed: $error');
+    }
+    try {
+      await refreshAdPrivacyRequirement();
+    } catch (error) {
+      debugPrint('AdMob privacy options status unavailable: $error');
+    }
     if (!await ConsentInformation.instance.canRequestAds()) {
       throw StateError('Consent does not permit ads');
     }
@@ -95,6 +113,7 @@ class GoogleAdsService implements AdsService {
       listener: BannerAdListener(
         onAdLoaded: (ad) => result.complete(ad as BannerAd),
         onAdFailedToLoad: (ad, error) {
+          debugPrint('AdMob banner failed to load: $error');
           ad.dispose();
           result.complete(null);
         },
@@ -196,96 +215,180 @@ class GoogleAdsService implements AdsService {
   }
 }
 
-AdsService createAdsService() =>
-    !const bool.fromEnvironment('ADMOB_ENABLED') ||
-        const bool.fromEnvironment('ADMOB_USE_MOCK', defaultValue: true)
-    ? MockAdsService()
-    : GoogleAdsService();
+const liveAdsEnabled =
+    bool.fromEnvironment('ADMOB_ENABLED') &&
+    !bool.fromEnvironment('ADMOB_USE_MOCK', defaultValue: true);
+final _googleAdsService = GoogleAdsService();
+final adPrivacyRequired = ValueNotifier<bool>(false);
+final _adPrivacyOpen = ValueNotifier<bool>(false);
 
-/// A single optional placement at the end of settings, clear of business controls.
+Future<void> refreshAdPrivacyRequirement() async {
+  adPrivacyRequired.value =
+      await ConsentInformation.instance.getPrivacyOptionsRequirementStatus() ==
+      PrivacyOptionsRequirementStatus.required;
+}
+
+AdsService createAdsService() =>
+    liveAdsEnabled ? _googleAdsService : MockAdsService();
+
+/// One persistent banner above navigation; privacy choices live in settings.
 class OptionalAdBanner extends StatefulWidget {
   const OptionalAdBanner({super.key});
   @override
   State<OptionalAdBanner> createState() => _OptionalAdBannerState();
 }
 
-class _OptionalAdBannerState extends State<OptionalAdBanner> {
+class _OptionalAdBannerState extends State<OptionalAdBanner>
+    with WidgetsBindingObserver {
   BannerAd? banner;
-  bool privacyRequired = false;
+  Timer? _retry;
+  bool _loading = false;
+  int _generation = 0;
+  int _retrySeconds = 30;
+
   @override
   void initState() {
     super.initState();
-    if (const bool.fromEnvironment('ADMOB_ENABLED') &&
-        !const bool.fromEnvironment('ADMOB_USE_MOCK', defaultValue: true)) {
+    if (liveAdsEnabled) {
+      WidgetsBinding.instance.addObserver(this);
+      _adPrivacyOpen.addListener(_privacyChanged);
+      // Show any required consent form after the first screen has rendered.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(load());
+      });
+    }
+  }
+
+  void _privacyChanged() {
+    _generation++;
+    _retry?.cancel();
+    setState(() {
+      banner?.dispose();
+      banner = null;
+      _loading = false;
+    });
+    if (!_adPrivacyOpen.value) unawaited(load());
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && banner == null) {
       unawaited(load());
+    } else if (state != AppLifecycleState.resumed) {
+      _retry?.cancel();
     }
   }
 
   Future<void> load() async {
+    if (_loading || !mounted || _adPrivacyOpen.value) return;
+    _retry?.cancel();
+    _loading = true;
+    final generation = _generation;
     try {
       final service = createAdsService();
       await service.initialize();
+      if (!mounted || generation != _generation) return;
       final result = await service.loadBanner();
-      if (!mounted) {
+      if (!mounted || generation != _generation) {
         result?.dispose();
         return;
       }
       setState(() => banner = result);
-    } catch (_) {
-      // Business functions remain available when advertising fails.
+      if (result != null) _retrySeconds = 30;
+    } catch (error) {
+      debugPrint('AdMob banner unavailable: $error');
     } finally {
-      // Privacy choices must not depend on whether an ad filled successfully.
-      try {
-        final required = await ConsentInformation.instance
-            .getPrivacyOptionsRequirementStatus();
-        if (mounted) {
-          setState(
-            () => privacyRequired =
-                required == PrivacyOptionsRequirementStatus.required,
+      if (mounted && generation == _generation) {
+        _loading = false;
+        final lifecycle = WidgetsBinding.instance.lifecycleState;
+        if (banner == null &&
+            !_adPrivacyOpen.value &&
+            (lifecycle == null || lifecycle == AppLifecycleState.resumed)) {
+          _retry = Timer(
+            Duration(seconds: _retrySeconds),
+            () => unawaited(load()),
           );
+          _retrySeconds = (_retrySeconds * 2).clamp(30, 120);
         }
-      } catch (_) {
-        // A missing platform response must not interrupt the business screen.
       }
     }
   }
 
-  void showPrivacy() {
-    // Remove the old ad before a changed consent decision can take effect.
-    setState(() {
-      banner?.dispose();
-      banner = null;
-    });
-    ConsentForm.showPrivacyOptionsForm((error) {
-      if (mounted && error == null) {
-        unawaited(load());
-      }
-    });
-  }
-
   @override
   void dispose() {
+    _generation++;
+    _retry?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    _adPrivacyOpen.removeListener(_privacyChanged);
     banner?.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      if (banner != null) ...[
-        const SizedBox(height: 16),
-        const Text('Iklan'),
-        SizedBox(
-          width: banner!.size.width.toDouble(),
-          height: banner!.size.height.toDouble(),
-          child: AdWidget(ad: banner!),
-        ),
-      ],
-      if (privacyRequired)
-        TextButton(
-          onPressed: showPrivacy,
-          child: const Text('Pilihan privasi iklan'),
-        ),
-    ],
+  Widget build(BuildContext context) => banner == null
+      ? const SizedBox.shrink()
+      : SafeArea(
+          top: false,
+          bottom: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Iklan'),
+                SizedBox(
+                  width: banner!.size.width.toDouble(),
+                  height: banner!.size.height.toDouble(),
+                  child: AdWidget(ad: banner!),
+                ),
+              ],
+            ),
+          ),
+        );
+}
+
+class AdPrivacyOptions extends StatelessWidget {
+  const AdPrivacyOptions({super.key});
+
+  Future<void> _show(BuildContext context) async {
+    if (_adPrivacyOpen.value) return;
+    _adPrivacyOpen.value = true;
+    try {
+      final done = Completer<FormError?>();
+      ConsentForm.showPrivacyOptionsForm(done.complete);
+      final error = await done.future;
+      await refreshAdPrivacyRequirement();
+      if (error != null && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Pilihan privasi belum dapat dibuka. Coba lagi.'),
+          ),
+        );
+      }
+    } catch (error) {
+      debugPrint('AdMob privacy options unavailable: $error');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Pilihan privasi belum dapat dibuka. Coba lagi.'),
+          ),
+        );
+      }
+    } finally {
+      // Reload only after the form closes, including cancellation/errors.
+      _adPrivacyOpen.value = false;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder<bool>(
+    valueListenable: adPrivacyRequired,
+    builder: (context, required, _) => !required
+        ? const SizedBox.shrink()
+        : ListTile(
+            leading: const Icon(Icons.privacy_tip_outlined),
+            title: const Text('Pilihan privasi iklan'),
+            onTap: () => unawaited(_show(context)),
+          ),
   );
 }

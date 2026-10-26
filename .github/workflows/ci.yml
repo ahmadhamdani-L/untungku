@@ -24,6 +24,7 @@ jobs:
       - run: python3 -m unittest discover -s tool -p "test_*.py"
       - run: flutter analyze
       - run: flutter test --coverage
+      - run: flutter test test/ads_consent_test.dart --dart-define=ADMOB_ENABLED=true --dart-define=ADMOB_USE_MOCK=false
       - uses: actions/upload-artifact@v4
         with:
           name: coverage

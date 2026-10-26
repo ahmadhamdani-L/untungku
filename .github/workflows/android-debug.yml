@@ -8,6 +8,12 @@ on:
       - 'integration_test/**'
       - 'README.md'
   workflow_dispatch:
+    inputs:
+      ad_profile:
+        description: 'Offline or real Google test banner (never owner ad units)'
+        type: choice
+        options: [offline, google-test]
+        default: offline
 permissions:
   contents: read
 concurrency:
@@ -17,6 +23,8 @@ jobs:
   apk:
     runs-on: ubuntu-latest
     timeout-minutes: 35
+    env:
+      AD_CONFIG_PATH: ${{ inputs.ad_profile == 'google-test' && 'config/google-test.json' || 'config/development.json' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -31,11 +39,11 @@ jobs:
       - run: flutter pub get --enforce-lockfile
       - run: flutter analyze
       - run: flutter test
-      - run: flutter build apk --debug --dart-define=ADMOB_ENABLED=false --dart-define=ADMOB_USE_MOCK=true
+      - run: flutter build apk --debug --dart-define-from-file="$AD_CONFIG_PATH"
       - run: test -s build/app/outputs/flutter-apk/app-debug.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: untungku-android-debug-apk
+          name: untungku-android-debug-apk-${{ inputs.ad_profile || 'offline' }}
           path: build/app/outputs/flutter-apk/app-debug.apk
           if-no-files-found: error
           retention-days: 14

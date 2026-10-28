@@ -42,7 +42,7 @@ class _TransactionsState extends ConsumerState<TransactionsPage> {
                   s.voided
                       ? Icons.cancel_outlined
                       : Icons.arrow_downward_rounded,
-                  color: s.voided ? Colors.grey : const Color(0xFF087F5B),
+                  color: s.voided ? Colors.grey : const Color(0xFF165BE7),
                 ),
                 title: Text(
                   s.lines.map((l) => '${l.name} ×${l.quantity}').join(', '),

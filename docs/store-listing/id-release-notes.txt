@@ -1,7 +1,3 @@
 <id>
-Rilis awal UntungKu Pro.
-• Pencatatan produk, stok, penjualan, dan pengeluaran.
-• Dashboard serta kalkulator estimasi laba.
-• Ekspor CSV, backup dan pemulihan JSON.
-• Tema terang/gelap dan kebijakan privasi yang dapat dibaca offline.
+Nama baru LarisKas dengan tampilan biru. Laporan keuangan dan persediaan lokal, serta penempatan iklan yang tidak menutupi alur usaha. Data dan backup lama tetap kompatibel.
 </id>

@@ -1,0 +1,3 @@
+[mcp_servers.codegraph]
+command = "npx"
+args = ["--yes", "@colbymchenry/codegraph", "serve", "--mcp"]

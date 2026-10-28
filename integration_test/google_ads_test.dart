@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:untungku_pro/services/ads.dart';
 
 void main() {
@@ -21,11 +22,13 @@ void main() {
     await tester.runAsync(() async {
       await service.initialize().timeout(const Duration(seconds: 60));
       expect(service.ready, isTrue);
-      final banner = await service.loadBanner().timeout(
-        const Duration(seconds: 60),
-      );
+      final banner = await service
+          .loadBanner(size: AdSize.getInlineAdaptiveBannerAdSize(320, 100))
+          .timeout(const Duration(seconds: 60));
       expect(banner, isNotNull, reason: 'A real Google test banner must fill');
-      await banner!.dispose();
+      final size = await banner!.getPlatformAdSize();
+      expect(size?.height, greaterThan(0));
+      await banner.dispose();
     });
   }, timeout: const Timeout(Duration(minutes: 3)));
 }

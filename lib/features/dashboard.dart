@@ -1,7 +1,8 @@
 part of 'app.dart';
 
 class Dashboard extends ConsumerStatefulWidget {
-  const Dashboard({super.key});
+  const Dashboard({super.key, this.active = true});
+  final bool active;
   @override
   ConsumerState<Dashboard> createState() => _DashboardState();
 }
@@ -98,7 +99,7 @@ class _DashboardState extends ConsumerState<Dashboard> {
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFF07583F), Color(0xFF10966B)],
+              colors: [Color(0xFF12366E), Color(0xFF165BE7)],
             ),
             borderRadius: BorderRadius.circular(24),
           ),
@@ -108,7 +109,7 @@ class _DashboardState extends ConsumerState<Dashboard> {
               const Text(
                 'PENDAPATAN TERCATAT',
                 style: TextStyle(
-                  color: Color(0xFFBEECD8),
+                  color: Color(0xFFEAF2FF),
                   letterSpacing: 1.5,
                   fontSize: 12,
                 ),
@@ -152,7 +153,7 @@ class _DashboardState extends ConsumerState<Dashboard> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(metric.$3, color: const Color(0xFF087F5B)),
+                          Icon(metric.$3, color: const Color(0xFF165BE7)),
                           const SizedBox(height: 14),
                           Text(metric.$1),
                           const SizedBox(height: 6),
@@ -183,6 +184,15 @@ class _DashboardState extends ConsumerState<Dashboard> {
           ),
           icon: const Icon(Icons.add),
           label: const Text('Catat penjualan'),
+        ),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
+          onPressed: () => Navigator.push(
+            c,
+            MaterialPageRoute(builder: (_) => const ReportsPage()),
+          ),
+          icon: const Icon(Icons.assessment_outlined),
+          label: const Text('Lihat laporan usaha'),
         ),
         const SizedBox(height: 24),
         Text('Produk terlaris', style: Theme.of(c).textTheme.titleLarge),
@@ -217,6 +227,8 @@ class _DashboardState extends ConsumerState<Dashboard> {
           'Pendapatan = penjualan setelah diskon. Laba kotor = pendapatan − modal barang. Estimasi laba = laba setelah kemasan, biaya transaksi, dan pengeluaran tercatat. Bukan laporan akuntansi lengkap.',
           style: TextStyle(fontSize: 12, height: 1.5),
         ),
+        const SizedBox(height: 24),
+        OptionalAdBanner(active: widget.active),
       ],
     );
   }

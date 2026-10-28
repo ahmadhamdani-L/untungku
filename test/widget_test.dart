@@ -22,11 +22,27 @@ void main() {
         child: const UntungkuApp(),
       ),
     );
-    expect(find.text('Usaha rapi.\nUntung lebih pasti.'), findsOneWidget);
+    expect(find.text('Usaha Rapi,\nBisnis Makin Laris.'), findsOneWidget);
     await tester.ensureVisible(find.text('Mulai / lewati pengenalan'));
     await tester.tap(find.text('Mulai / lewati pengenalan'));
     await tester.pumpAndSettle();
     expect(find.text('Kabar usaha Anda'), findsOneWidget);
+    expect(find.byType(BottomSheet), findsNothing);
+    await tester.scrollUntilVisible(
+      find.text('Lihat laporan usaha'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Lihat laporan usaha'));
+    await tester.pumpAndSettle();
+    expect(find.text('Laporan usaha'), findsWidgets);
+    expect(find.text('Produk aktif'), findsNothing);
+    await tester.tap(find.text('Persediaan'));
+    await tester.pumpAndSettle();
+    expect(find.text('Produk aktif'), findsOneWidget);
+    await tester.tap(find.text('Selesai lihat laporan'));
+    await tester.pumpAndSettle();
+    expect(find.text('Selesai lihat laporan'), findsNothing);
     await tester.tap(find.text('Produk'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Tambah produk'));

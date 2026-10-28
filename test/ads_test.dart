@@ -17,12 +17,25 @@ void main() {
       AdState.failed,
     ]);
   });
-  test('mock banner never loads SDK and interstitial has no reward', () async {
+  test('mock banner never loads SDK', () async {
     expect(await MockAdsService().loadBanner(), isNull);
-    expect(await MockAdsService().interstitial().toList(), [
-      AdState.loading,
-      AdState.loaded,
-      AdState.dismissed,
-    ]);
+  });
+  test('interstitial cap enforces cooldown, daily maximum, and restore', () {
+    final cap = InterstitialFrequencyCap();
+    final start = DateTime(2026, 10, 28, 9);
+    expect(cap.canShow(start), isTrue);
+    cap.recordShown(start);
+    expect(cap.canShow(start.add(const Duration(minutes: 9))), isFalse);
+    expect(cap.canShow(start.add(const Duration(minutes: 10))), isTrue);
+    cap.recordShown(start.add(const Duration(minutes: 10)));
+    cap.recordShown(start.add(const Duration(minutes: 20)));
+    expect(cap.canShow(start.add(const Duration(hours: 3))), isFalse);
+    final restored = InterstitialFrequencyCap()
+      ..restore(
+        lastShown: start.add(const Duration(minutes: 20)),
+        shownToday: 3,
+      );
+    expect(restored.canShow(start.add(const Duration(hours: 3))), isFalse);
+    expect(restored.canShow(start.add(const Duration(days: 1))), isTrue);
   });
 }

@@ -4,6 +4,7 @@ import 'data/database.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'data/store.dart';
 import 'features/app.dart';
+import 'services/ads.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,6 +12,12 @@ Future<void> main() async {
   final store = Store(AppDatabase.local());
   try {
     await store.load();
+    AdManager.instance.restoreFrequencyCap(store.settings);
+    AdManager.instance.persistImpression = (time, count) => store.saveSettings({
+      ...store.settings,
+      'adInterstitialLastShown': time.toIso8601String(),
+      'adInterstitialCount': count,
+    });
     runApp(
       ProviderScope(
         overrides: [storeProvider.overrideWith((ref) => store)],

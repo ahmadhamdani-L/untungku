@@ -1,4 +1,4 @@
-UntungKu Pro membantu pemilik UMKM mencatat kegiatan usaha, memantau stok, dan memahami perhitungan laba dari satu aplikasi berbahasa Indonesia.
+LarisKas membantu pemilik UMKM mencatat kegiatan usaha, memantau stok, dan memahami perhitungan laba dari satu aplikasi berbahasa Indonesia.
 
 Pencatatan usaha dapat digunakan offline tanpa membuat akun. Data usaha tersimpan di perangkat Anda.
 
@@ -19,7 +19,7 @@ DATA DAN BACKUP
 Lakukan backup secara berkala dan simpan di tempat yang aman. Menghapus data aplikasi, menghapus instalasi, atau kehilangan perangkat dapat menghilangkan catatan lokal. Salinan backup yang diekspor berada di lokasi yang Anda pilih.
 
 IKLAN
-Versi ini menyertakan banner Google AdMob pada halaman Pengaturan. Iklan membutuhkan koneksi internet dan mengikuti pemeriksaan pilihan privasi. Fitur pencatatan usaha tetap dapat digunakan ketika iklan tidak tersedia.
+Versi beriklan dapat menampilkan banner Google AdMob pada Ringkasan, Produk, Laporan, dan Pengaturan, serta iklan layar penuh terbatas saat selesai melihat laporan. Iklan membutuhkan koneksi internet dan mengikuti pemeriksaan pilihan privasi. Fitur pencatatan usaha tetap dapat digunakan ketika iklan tidak tersedia.
 
 Perhitungan laba merupakan estimasi berdasarkan data dan biaya yang Anda masukkan. Periksa kembali catatan agar sesuai dengan kegiatan usaha Anda.
 

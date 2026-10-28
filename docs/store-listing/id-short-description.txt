@@ -1,1 +1,1 @@
-Catat penjualan, kelola stok, dan hitung laba usaha secara offline.
+Kasir, stok, penjualan, dan laporan usaha UMKM yang bisa offline.

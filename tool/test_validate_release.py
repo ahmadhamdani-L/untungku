@@ -37,6 +37,9 @@ class ReleaseGuardTest(unittest.TestCase):
     def test_unknown_profile_fails(self):
         self.assertNotEqual(self.run_guard(AD_CONFIG_PATH='/tmp/unknown.json').returncode, 0)
 
+    def test_google_test_profile_matches_test_app(self):
+        self.assertEqual(self.run_guard(AD_CONFIG_PATH='config/google-test.json').returncode, 0)
+
 
 if __name__ == '__main__':
     unittest.main()

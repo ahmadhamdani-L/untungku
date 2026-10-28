@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -16,6 +17,7 @@ import '../domain/money.dart';
 import '../domain/reporting.dart';
 
 part 'dashboard.dart';
+part 'reports.dart';
 part 'products.dart';
 part 'transactions.dart';
 part 'calculator.dart';
@@ -39,12 +41,12 @@ class UntungkuApp extends ConsumerWidget {
       useMaterial3: true,
       brightness: b,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFF087F5B),
+        seedColor: const Color(0xFF165BE7),
         brightness: b,
       ),
       scaffoldBackgroundColor: b == Brightness.light
-          ? const Color(0xFFF6F8F7)
-          : const Color(0xFF101A16),
+          ? const Color(0xFFF5F8FE)
+          : const Color(0xFF101A2E),
       inputDecorationTheme: const InputDecorationTheme(
         border: OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(14)),
@@ -56,7 +58,7 @@ class UntungkuApp extends ConsumerWidget {
       ),
     );
     return MaterialApp(
-      title: 'UntungKu Pro',
+      title: 'LarisKas',
       locale: const Locale('id', 'ID'),
       supportedLocales: const [Locale('id', 'ID'), Locale('en')],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
@@ -89,7 +91,7 @@ class Onboarding extends ConsumerWidget {
                 const Brand(size: 88),
                 const SizedBox(height: 40),
                 Text(
-                  'Usaha rapi.\nUntung lebih pasti.',
+                  'Usaha Rapi,\nBisnis Makin Laris.',
                   style: Theme.of(context).textTheme.displaySmall?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
@@ -146,13 +148,13 @@ class Brand extends StatelessWidget {
     width: size,
     height: size,
     decoration: BoxDecoration(
-      color: const Color(0xFF087F5B),
+      color: const Color(0xFF165BE7),
       borderRadius: BorderRadius.circular(size * .28),
     ),
     child: ClipRRect(
       borderRadius: BorderRadius.circular(size * .28),
       child: Image.asset(
-        'assets/branding/untungku-icon-512.png',
+        'assets/branding/lariskas-icon-512.png',
         width: size,
         height: size,
       ),
@@ -181,7 +183,7 @@ class _HomeState extends ConsumerState<Home> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'UntungKu Pro',
+                  'LarisKas',
                   style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20),
                 ),
                 Text(
@@ -205,11 +207,11 @@ class _HomeState extends ConsumerState<Home> {
       ),
       body: IndexedStack(
         index: index,
-        children: const [
-          Dashboard(),
-          ProductsPage(),
-          TransactionsPage(),
-          CalculatorPage(),
+        children: [
+          Dashboard(active: index == 0),
+          ProductsPage(active: index == 1),
+          const TransactionsPage(),
+          const CalculatorPage(),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -275,7 +277,7 @@ Widget empty(String title, String detail, IconData icon) => Padding(
   padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 12),
   child: Column(
     children: [
-      Icon(icon, size: 64, color: const Color(0xFF36A17C)),
+      Icon(icon, size: 64, color: const Color(0xFF3B82F6)),
       const SizedBox(height: 16),
       Text(
         title,

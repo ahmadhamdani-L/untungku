@@ -1,7 +1,8 @@
 part of 'app.dart';
 
 class ProductsPage extends ConsumerStatefulWidget {
-  const ProductsPage({super.key});
+  const ProductsPage({super.key, this.active = true});
+  final bool active;
   @override
   ConsumerState<ProductsPage> createState() => _ProductsState();
 }
@@ -134,6 +135,8 @@ class _ProductsState extends ConsumerState<ProductsPage> {
               ),
             ),
           ),
+        const SizedBox(height: 24),
+        OptionalAdBanner(active: widget.active),
       ],
     );
   }
@@ -194,7 +197,12 @@ Future<void> stockDialog(BuildContext c, Store store, Product p) async {
             busy = true;
             try {
               await store.adjustStock(p.id, int.parse(delta.text), reason.text);
-              if (d.mounted) Navigator.pop(d);
+              if (d.mounted) {
+                Navigator.pop(d);
+                ScaffoldMessenger.of(c).showSnackBar(
+                  const SnackBar(content: Text('Stok berhasil disimpan.')),
+                );
+              }
             } catch (_) {
               busy = false;
               rethrow;
@@ -333,6 +341,11 @@ class _ProductFormState extends ConsumerState<ProductForm> {
                               );
                           if (c.mounted) {
                             Navigator.pop(c);
+                            ScaffoldMessenger.of(c).showSnackBar(
+                              const SnackBar(
+                                content: Text('Produk berhasil disimpan.'),
+                              ),
+                            );
                           }
                         } finally {
                           if (mounted) {

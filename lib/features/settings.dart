@@ -134,7 +134,7 @@ class _SettingsState extends ConsumerState<SettingsPage> {
                     () => export(
                       c,
                       store.backup(),
-                      'untungku-backup-${DateFormat('yyyyMMdd-HHmmss').format(DateTime.now())}.json',
+                      'lariskas-backup-${DateFormat('yyyyMMdd-HHmmss').format(DateTime.now())}.json',
                     ),
                   ),
           ),
@@ -144,7 +144,7 @@ class _SettingsState extends ConsumerState<SettingsPage> {
             subtitle: const Text('Bisa dibuka di aplikasi spreadsheet'),
             onTap: () => action(
               c,
-              () => export(c, store.csv(), 'untungku-transaksi.csv'),
+              () => export(c, store.csv(), 'lariskas-transaksi.csv'),
             ),
           ),
           ListTile(
@@ -281,7 +281,7 @@ class _SettingsState extends ConsumerState<SettingsPage> {
           const OptionalAdBanner(),
           const ListTile(
             leading: Icon(Icons.info_outline),
-            title: Text('UntungKu Pro 1.0.0'),
+            title: Text('LarisKas 1.0.1'),
             subtitle: Text(
               'Estimasi laba bukan nasihat keuangan. Retur parsial: revisi transaksi. Pembatalan penuh mengembalikan stok. Stok minus ditolak secara default dan hanya diizinkan melalui pengaturan eksplisit.',
             ),

@@ -1,8 +1,8 @@
-Kebijakan Privasi UntungKu Pro
+Kebijakan Privasi LarisKas
 Diperbarui: 20 Oktober 2026
 
 1. Tentang aplikasi dan pengelola
-UntungKu Pro adalah aplikasi Android untuk pencatatan produk, stok, penjualan, pengeluaran, dan perhitungan laba usaha. Aplikasi dikelola oleh PT DDD DREAM DEVELOP DIGITAL dengan nama pengembang Lelouch D. Kebijakan ini menjelaskan penyimpanan data usaha di perangkat dan pemrosesan data oleh layanan iklan pada versi beriklan. Aplikasi tidak mewajibkan pembuatan akun.
+LarisKas adalah aplikasi Android untuk pencatatan produk, stok, penjualan, pengeluaran, dan perhitungan laba usaha. Aplikasi dikelola oleh PT DDD DREAM DEVELOP DIGITAL dengan nama pengembang Lelouch D. Kebijakan ini menjelaskan penyimpanan data usaha di perangkat dan pemrosesan data oleh layanan iklan pada versi beriklan. Aplikasi tidak mewajibkan pembuatan akun.
 
 2. Data usaha yang Anda masukkan
 Nama usaha, produk, harga, stok, transaksi, pengeluaran, catatan, dan preferensi disimpan secara lokal di penyimpanan aplikasi pada perangkat Anda. Aplikasi tidak memiliki server bisnis untuk menerima database tersebut dan tidak mengirim isi transaksi ke AdMob untuk permintaan iklan. Perhitungan laba dan pencatatan usaha dapat berjalan tanpa internet. Kami tidak memperoleh akses jarak jauh ke database lokal Anda.
@@ -11,7 +11,7 @@ Nama usaha, produk, harga, stok, transaksi, pengeluaran, catatan, dan preferensi
 Backup JSON dan ekspor CSV hanya dibuat ketika Anda memilih fitur tersebut. Lokasi penyimpanan dipilih melalui pemilih berkas Android. Berkas dapat memuat informasi usaha dan tidak dienkripsi oleh fitur ekspor aplikasi. Simpan dengan aman. Jika Anda memilih penyedia penyimpanan cloud, mengirim berkas, atau membagikannya kepada orang lain, penanganan salinan tersebut mengikuti layanan atau penerima yang Anda pilih. Restore mengganti data lokal setelah konfirmasi dan membuat salinan pemulihan internal.
 
 4. Iklan Google AdMob dan data perangkat
-Versi beriklan menggunakan Google Mobile Ads (AdMob) untuk menampilkan banner pada halaman Pengaturan. SDK Google dapat mengumpulkan atau memproses informasi perangkat dan aplikasi, alamat IP dan perkiraan lokasi yang diturunkan dari IP, pengenal yang tersedia, interaksi iklan, serta data diagnostik untuk penayangan, pengukuran, keamanan, dan pencegahan penyalahgunaan iklan. Data tersebut diproses oleh Google dan mitra periklanan sesuai konfigurasi layanan, wilayah, dan pilihan privasi pengguna. Aplikasi tidak mengirimkan isi database usaha sebagai bagian dari permintaan iklan. Build offline/mock tidak melakukan permintaan iklan Google.
+Versi beriklan menggunakan Google Mobile Ads (AdMob) untuk menampilkan banner pada layar Ringkasan, Produk, Laporan, dan Pengaturan, serta interstisial terbatas ketika meninggalkan Laporan. SDK Google dapat mengumpulkan atau memproses informasi perangkat dan aplikasi, alamat IP dan perkiraan lokasi yang diturunkan dari IP, pengenal yang tersedia, interaksi iklan, serta data diagnostik untuk penayangan, pengukuran, keamanan, dan pencegahan penyalahgunaan iklan. Data tersebut diproses oleh Google dan mitra periklanan sesuai konfigurasi layanan, wilayah, dan pilihan privasi pengguna. Aplikasi tidak mengirimkan isi database usaha sebagai bagian dari permintaan iklan. Build offline/mock tidak melakukan permintaan iklan Google.
 
 5. Persetujuan dan pilihan privasi iklan
 Sebelum meminta iklan, aplikasi menggunakan Google User Messaging Platform (UMP) untuk memeriksa status persetujuan dan menampilkan pesan jika diwajibkan serta tersedia pada konfigurasi akun. Permintaan iklan hanya dilakukan ketika UMP mengizinkan. Jika diwajibkan UMP, tombol Pilihan privasi iklan tersedia di Pengaturan agar Anda dapat meninjau atau mengubah pilihan. Gagal memuat iklan atau tidak diizinkannya permintaan iklan tidak menghalangi fitur pencatatan usaha. Pengaturan privasi perangkat juga dapat memengaruhi data yang tersedia bagi SDK.

@@ -1,5 +1,5 @@
 {
-  "title": "Kebijakan Privasi UntungKu Pro",
+  "title": "Kebijakan Privasi LarisKas",
   "updated": "20 Oktober 2026",
   "operator": "PT DDD DREAM DEVELOP DIGITAL",
   "developer": "Lelouch D",
@@ -7,7 +7,7 @@
   "sections": [
     {
       "title": "Tentang aplikasi dan pengelola",
-      "text": "UntungKu Pro adalah aplikasi Android untuk pencatatan produk, stok, penjualan, pengeluaran, dan perhitungan laba usaha. Aplikasi dikelola oleh PT DDD DREAM DEVELOP DIGITAL dengan nama pengembang Lelouch D. Kebijakan ini menjelaskan penyimpanan data usaha di perangkat dan pemrosesan data oleh layanan iklan pada versi beriklan. Aplikasi tidak mewajibkan pembuatan akun."
+      "text": "LarisKas adalah aplikasi Android untuk pencatatan produk, stok, penjualan, pengeluaran, dan perhitungan laba usaha. Aplikasi dikelola oleh PT DDD DREAM DEVELOP DIGITAL dengan nama pengembang Lelouch D. Kebijakan ini menjelaskan penyimpanan data usaha di perangkat dan pemrosesan data oleh layanan iklan pada versi beriklan. Aplikasi tidak mewajibkan pembuatan akun."
     },
     {
       "title": "Data usaha yang Anda masukkan",
@@ -19,7 +19,7 @@
     },
     {
       "title": "Iklan Google AdMob dan data perangkat",
-      "text": "Versi beriklan menggunakan Google Mobile Ads (AdMob) untuk menampilkan banner pada halaman Pengaturan. SDK Google dapat mengumpulkan atau memproses informasi perangkat dan aplikasi, alamat IP dan perkiraan lokasi yang diturunkan dari IP, pengenal yang tersedia, interaksi iklan, serta data diagnostik untuk penayangan, pengukuran, keamanan, dan pencegahan penyalahgunaan iklan. Data tersebut diproses oleh Google dan mitra periklanan sesuai konfigurasi layanan, wilayah, dan pilihan privasi pengguna. Aplikasi tidak mengirimkan isi database usaha sebagai bagian dari permintaan iklan. Build offline/mock tidak melakukan permintaan iklan Google."
+      "text": "Versi beriklan menggunakan Google Mobile Ads (AdMob) untuk menampilkan banner pada layar Ringkasan, Produk, Laporan, dan Pengaturan, serta interstisial terbatas ketika meninggalkan Laporan. SDK Google dapat mengumpulkan atau memproses informasi perangkat dan aplikasi, alamat IP dan perkiraan lokasi yang diturunkan dari IP, pengenal yang tersedia, interaksi iklan, serta data diagnostik untuk penayangan, pengukuran, keamanan, dan pencegahan penyalahgunaan iklan. Data tersebut diproses oleh Google dan mitra periklanan sesuai konfigurasi layanan, wilayah, dan pilihan privasi pengguna. Aplikasi tidak mengirimkan isi database usaha sebagai bagian dari permintaan iklan. Build offline/mock tidak melakukan permintaan iklan Google."
     },
     {
       "title": "Persetujuan dan pilihan privasi iklan",

@@ -8,7 +8,7 @@ void main() {
     (tester) async {
       await tester.pumpWidget(const MaterialApp(home: PrivacyPolicyPage()));
       await tester.pumpAndSettle();
-      expect(find.text('Kebijakan Privasi UntungKu Pro'), findsOneWidget);
+      expect(find.text('Kebijakan Privasi LarisKas'), findsOneWidget);
       expect(find.textContaining('PT DDD DREAM DEVELOP DIGITAL'), findsWidgets);
       expect(find.textContaining('hmdhmdndani@gmail.com'), findsWidgets);
       expect(

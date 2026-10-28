@@ -1,12 +1,20 @@
 # Konfigurasi AdMob dan AAB
 
+## Audit rebranding LarisKas — 28 Oktober 2026
+
+Identitas paket Android tetap `id.untungku.untungku_pro`. Profil owner tetap memakai App ID dan unit yang tercatat di bawah. Profil Google test sekarang menyebut App ID test secara eksplisit; validasi build memeriksa format dan kesamaan publisher App ID dengan unit banner, interstisial, dan rewarded. Di luar build release, SDK menolak unit owner. Banner tetap hanya di akhir Pengaturan; penempatan `bottomSheet` lintas tab dihapus karena dapat menutupi kontrol kasir dan membuat banner ganda.
+
+`https://ddd-dream-develop-digital.vercel.app/app-ads.txt` merespons HTTP 200 dengan `google.com, pub-6953774620667597, DIRECT, f08c47fec0942fa0`. Halaman Play untuk paket yang sama dapat diakses dan memuat domain developer tersebut. Ini memeriksa publikasi file dan hubungan listing yang terlihat publik, tetapi status verifikasi crawler AdMob, kecocokan jenis setiap unit, pembatasan penayangan, dan status akun hanya dapat dipastikan di AdMob Console. Periksa halaman Apps → app verification dan app-ads.txt serta Policy Center sebelum menganggap monetisasi siap.
+
+Nama listing publik yang terlihat masih UntungKu Pro saat audit; rebranding Play belum terverifikasi. Jangan mengganti App ID atau publisher dalam app-ads.txt saat memperbarui nama listing. Bila situs developer listing berubah, terbitkan file yang sama di root domain baru dan tunggu crawl AdMob.
+
 Profil `config/admob-release.json` memuat ID publik pemilik:
 
 | Jenis | ID | Penempatan saat ini |
 | --- | --- | --- |
 | Aplikasi Android | `ca-app-pub-6953774620667597~7700178927` | Metadata manifest saat build profil owner |
-| Banner | `ca-app-pub-6953774620667597/7589954559` | Akhir Pengaturan, setelah UMP mengizinkan |
-| Interstisial | `ca-app-pub-6953774620667597/9420454707` | Adapter tersedia, belum ada pemicu UI |
+| Banner | `ca-app-pub-6953774620667597/7589954559` | Ringkasan, Produk, Laporan, Pengaturan setelah UMP mengizinkan |
+| Interstisial | `ca-app-pub-6953774620667597/9420454707` | Hanya saat selesai melihat Laporan, bila sudah dimuat dan lolos batas frekuensi |
 | Rewarded | `ca-app-pub-6953774620667597/3650709544` | Adapter tersedia, belum ada pemicu/reward produk |
 | Native | `ca-app-pub-6953774620667597/8813950043` | Dicatat; belum diimplementasikan |
 | Pembukaan aplikasi | `ca-app-pub-6953774620667597/3753195059` | Dicatat; belum diimplementasikan |

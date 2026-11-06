@@ -1,15 +1,7 @@
-# Screenshot listing
+# Screenshot UntungKu Pro 1.1.0
 
-Tujuh PNG RGB 1080 × 1920, diambil dari aplikasi Android berjalan. Tool `tool/capture_screen.py` hanya membuang alpha yang sepenuhnya opak; tidak mengganti konten, memotong, atau mengubah ukuran layar.
+Delapan screenshot terbaru dari aplikasi Android berjalan, diambil 3 November 2026. Ponsel 1080 × 1920. Data usaha bertanda Contoh dibuat hanya dalam database memori pengujian. Produksi tetap tidak berisi data contoh.
 
-1. Dashboard dengan data awal kosong.
-2. Produk kosong.
-3. Transaksi kosong.
-4. Kalkulator.
-5. Hasil simulasi harga Rp20.000 dan modal Rp10.000.
-6. Pengaturan dan backup.
-7. Dashboard tema gelap.
+Urutan: dashboard, grafik dan ringkasan, produk, transaksi, piutang, detail penjualan, kalkulator, dan backup.
 
-Tidak ada transaksi contoh yang disisipkan ke database produksi. Gambar ini merupakan bahan listing, bukan klaim bahwa aplikasi telah diterima Play. Ikon dan feature graphic berada di `assets/branding`. Pemilik perlu meninjau listing dan kebijakan sebelum publikasi.
-
-Screenshot tablet 7 inci tersedia terpisah di [tablet-7-inch](tablet-7-inch/README.md): lima PNG 1200 × 1920 dari emulator Nexus 7, aplikasi release kode 2. Gunakan untuk kolom tablet 7 inci, bukan screenshot ponsel yang dibesarkan.
+Reproduksi: `CAPTURE_OUTPUT_DIR=build/store-captures/phone flutter drive --no-pub --driver=test_driver/store_capture.dart --target=integration_test/store_screenshots_test.dart -d <emulator-id> --dart-define-from-file=config/development.json`. Metadata dan hash ada di `capture-metadata.json`.

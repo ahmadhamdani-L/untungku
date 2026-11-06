@@ -82,6 +82,8 @@ void main() {
     await tester.tap(find.text('Simpan penjualan'));
     await tester.pumpAndSettle();
     expect(store.products.single.stock, 8);
+    await tester.tap(find.text('Selesai'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Ringkasan'));
     await tester.pumpAndSettle();
     expect(find.text('Rp 20.000'), findsOneWidget);

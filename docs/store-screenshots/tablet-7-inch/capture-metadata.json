@@ -1,37 +1,74 @@
 {
-  "device_profile": "Nexus 7 2013",
-  "avd": "Untungku_Tablet_7",
-  "native_dimensions": [
-    1200,
-    1920
-  ],
-  "density_dpi": 320,
-  "android_api": 37,
-  "app_version": "1.0.0",
-  "version_code": 2,
-  "source_aab": "UntungKu-Pro-1.0.0-v2-release-dea7489.aab",
-  "capture": "actual Android screencap; opaque alpha removed only; no resize or crop",
-  "business_data": "empty; calculator simulation price 20000, cost 10000, quantity 1",
+  "app_version": "1.1.0",
+  "version_code": 5,
+  "capture_date": "2026-11-03",
+  "device": "Nexus 7 2013 emulator",
+  "capture": "Actual Flutter Android application surface via integration_test; opaque alpha removed only; no crop or resizing",
+  "data": "Explicitly labeled example business in an in-memory database; absent from production startup",
   "files": [
     {
       "name": "01-dashboard.png",
-      "sha256": "6c2fb591edbc3655e7b5e5df93dbf78e743179a467c9342634922b77665b32dd"
+      "dimensions": [
+        1200,
+        1920
+      ],
+      "sha256": "2f038ead94b9d8d9ce119201fbfa4b6273344e329901e3b13fed8601fd1dd959"
     },
     {
-      "name": "02-products.png",
-      "sha256": "b3a6aa7311ba8c33b1a5830a86b72ba18c77a68160a63dfb3e5dd369088a6278"
+      "name": "02-insights.png",
+      "dimensions": [
+        1200,
+        1920
+      ],
+      "sha256": "3f3f9eaefe068e2b46a314958046aa825c899821b0bba9a150e7b5b21704bb86"
     },
     {
-      "name": "03-transactions.png",
-      "sha256": "c966a592aad5688583883fe016e6654b2c666ce37d4d609412cd16fbba85aaf4"
+      "name": "03-products.png",
+      "dimensions": [
+        1200,
+        1920
+      ],
+      "sha256": "0752f74ad4295864c0ad2e2d3040b13395196d3db8b9776868712d60e204f3d9"
     },
     {
-      "name": "04-calculator.png",
-      "sha256": "facd88e337e59d576d077c125229df192486b61d425074f618a746fbb2585426"
+      "name": "04-transactions.png",
+      "dimensions": [
+        1200,
+        1920
+      ],
+      "sha256": "9fa4eae89fa5c587a400aea7f13f2c4b88673c1a0b3f2a995c0ffd832cd7f5b1"
     },
     {
-      "name": "05-calculator-results.png",
-      "sha256": "058192640c44ad9eb70b1483fabbd85a2e5d2f73266ac0cd7e55d8530bee84fe"
+      "name": "05-receivables.png",
+      "dimensions": [
+        1200,
+        1920
+      ],
+      "sha256": "7d2659d5a8e3fcd4abe61434d20d423d8e302be054078e23dbe6e78a8d01e318"
+    },
+    {
+      "name": "06-sale-detail.png",
+      "dimensions": [
+        1200,
+        1920
+      ],
+      "sha256": "1fe4422c1945d140bf4ad1ea6f2296fce6f9dfade62d1327d862e20327b852c0"
+    },
+    {
+      "name": "07-calculator.png",
+      "dimensions": [
+        1200,
+        1920
+      ],
+      "sha256": "b2ba400adefde2dd38cd1a1b3a5c85e3f4f6e67c2bcde53dd45a4b5fca8800f4"
+    },
+    {
+      "name": "08-backup.png",
+      "dimensions": [
+        1200,
+        1920
+      ],
+      "sha256": "0b075062e7a999ccd55ff77ede1f8ba28c16afd43be06c8ded00c4e7005a91cb"
     }
   ]
 }

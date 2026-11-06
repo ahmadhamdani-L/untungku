@@ -1,10 +1,13 @@
 import 'dates.dart';
 import 'money.dart';
+import 'business/returns.dart';
 
 class Product {
   final String id, sku, name, category;
   final int cost, price, packaging, extra, stock, threshold;
   final bool archived;
+  final String barcode;
+  final bool favorite;
   final String created, updated;
   const Product({
     required this.id,
@@ -18,6 +21,8 @@ class Product {
     this.stock = 0,
     this.threshold = 5,
     this.archived = false,
+    this.barcode = '',
+    this.favorite = false,
     required this.created,
     required this.updated,
   });
@@ -33,6 +38,8 @@ class Product {
     stock: j['stock'],
     threshold: j['threshold'],
     archived: j['archived'],
+    barcode: j['barcode'] ?? '',
+    favorite: j['favorite'] ?? false,
     created: j['created'],
     updated: j['updated'],
   );
@@ -48,6 +55,8 @@ class Product {
     'stock': stock,
     'threshold': threshold,
     'archived': archived,
+    'barcode': barcode,
+    'favorite': favorite,
     'created': created,
     'updated': updated,
   };
@@ -66,6 +75,11 @@ class Product {
         threshold < 0 ||
         threshold > 1000000000) {
       throw ArgumentError('Data produk tidak valid');
+    }
+    if (barcode != barcode.trim() ||
+        barcode.length > 256 ||
+        barcode.contains(RegExp(r'[\x00-\x1F\x7F]'))) {
+      throw ArgumentError('Barcode tidak valid (maksimal 256 karakter)');
     }
     for (final v in [cost, price, packaging, extra]) {
       validMoney(v);
@@ -107,8 +121,41 @@ class SaleLine {
   };
 }
 
+class SalePayment {
+  final String id, date, method;
+  final String? accountId;
+  final int amount;
+  const SalePayment({
+    required this.id,
+    required this.date,
+    required this.amount,
+    required this.method,
+    this.accountId,
+  });
+  factory SalePayment.fromJson(Map<String, dynamic> j) => SalePayment(
+    id: j['id'],
+    date: j['date'],
+    amount: j['amount'],
+    method: j['method'],
+    accountId: j['accountId'],
+  );
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'date': date,
+    'amount': amount,
+    'method': method,
+    if (accountId != null) 'accountId': accountId,
+  };
+}
+
 class Sale {
   final String id, date, payment, note;
+  final String customer;
+  final String? dueDate;
+  final String? accountId;
+  final bool credit;
+  final List<SalePayment> payments;
+  final List<ReturnAdjustment> adjustments;
   final List<SaleLine> lines;
   final int discount, fixed, feeBps;
   final bool voided;
@@ -122,8 +169,18 @@ class Sale {
     this.payment = 'Tunai',
     this.note = '',
     this.voided = false,
+    this.customer = '',
+    this.dueDate,
+    this.accountId,
+    this.credit = false,
+    this.payments = const [],
+    this.adjustments = const [],
   });
-  factory Sale.fromJson(Map<String, dynamic> j) => Sale(
+  factory Sale.fromJson(
+    Map<String, dynamic> j, {
+    List<ReturnAdjustment> adjustments = const [],
+  }) => Sale(
+    adjustments: adjustments,
     id: j['id'],
     date: j['date'],
     lines: (j['lines'] as List)
@@ -135,6 +192,13 @@ class Sale {
     payment: j['payment'],
     note: j['note'],
     voided: j['voided'],
+    customer: j['customer'] ?? '',
+    dueDate: j['dueDate'],
+    accountId: j['accountId'],
+    credit: j['credit'] ?? false,
+    payments: (j['payments'] as List? ?? [])
+        .map((e) => SalePayment.fromJson(Map<String, dynamic>.from(e)))
+        .toList(),
   );
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -146,8 +210,79 @@ class Sale {
     'payment': payment,
     'note': note,
     'voided': voided,
+    'customer': customer,
+    'dueDate': dueDate,
+    if (accountId != null) 'accountId': accountId,
+    'credit': credit,
+    'payments': payments.map((p) => p.toJson()).toList(),
   };
+  int get paid => credit
+      ? payments.fold(0, (v, p) => v + p.amount)
+      : originalResult.revenue;
+  int get outstanding =>
+      voided ? 0 : (result.revenue - paid).clamp(0, maxMoney);
+  int get refundOutstanding =>
+      adjustments.fold<int>(0, (v, r) => v + r.refundOutstanding);
+  String get paymentStatus => voided
+      ? 'Dibatalkan'
+      : outstanding == 0
+      ? 'Lunas'
+      : paid == 0
+      ? 'Belum lunas'
+      : 'Sebagian';
+  bool overdueAt(DateTime now) =>
+      outstanding > 0 &&
+      dueDate != null &&
+      validDate(dueDate!).isBefore(DateTime(now.year, now.month, now.day));
+  void validatePayments() {
+    if (credit && customer.trim().isEmpty) {
+      throw ArgumentError('Nama pelanggan wajib untuk piutang');
+    }
+    if (dueDate != null) {
+      validDate(dueDate!);
+      if (dueDate!.length != 10 ||
+          dueDate!.compareTo(date.substring(0, 10)) < 0) {
+        throw ArgumentError('Jatuh tempo tidak boleh sebelum penjualan');
+      }
+    }
+    final ids = <String>{};
+    for (final p in payments) {
+      validMoney(p.amount);
+      validDate(p.date);
+      if (p.amount == 0 ||
+          p.id.isEmpty ||
+          !ids.add(p.id) ||
+          p.method.trim().isEmpty ||
+          validDate(p.date).isBefore(validDate(date))) {
+        throw ArgumentError('Pembayaran tidak valid');
+      }
+    }
+    if ((!credit && payments.isNotEmpty) || paid > originalResult.revenue) {
+      throw ArgumentError('Pembayaran melebihi total penjualan');
+    }
+  }
+
   ProfitResult get result {
+    final original = originalResult;
+    final revenue =
+        original.revenue -
+        adjustments.fold<int>(0, (v, r) => v + r.revenueReduction);
+    final cost =
+        original.cogs - adjustments.fold<int>(0, (v, r) => v + r.restoredCost);
+    final recovered = adjustments.fold<int>(0, (v, r) => v + r.recoveredFees);
+    return ProfitResult(
+      revenue,
+      cost,
+      revenue - cost,
+      original.net -
+          (original.revenue - revenue) +
+          (original.cogs - cost) +
+          recovered,
+      original.fees - recovered,
+    );
+  }
+
+  ProfitResult get originalResult {
     if (lines.isEmpty) {
       throw ArgumentError('Tambahkan produk');
     }

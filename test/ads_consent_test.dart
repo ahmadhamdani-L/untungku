@@ -90,6 +90,72 @@ void main() {
         expect(sdkInitializations, 1);
       },
     );
+    testWidgets(
+      'completion uses only preloaded ads and respects consent and foreground',
+      (tester) async {
+        var loads = 0, shows = 0, adId = -1;
+        final messenger =
+            TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+        messenger.setMockMethodCallHandler(channel, (call) async {
+          if (call.method == 'MobileAds#initialize') {
+            return InitializationStatus(<String, AdapterStatus>{});
+          }
+          if (call.method == 'loadInterstitialAd') {
+            loads++;
+            adId = (call.arguments as Map)['adId'] as int;
+          }
+          if (call.method == 'showAdWithoutView') shows++;
+          return null;
+        });
+        Future<void> event(String name) async {
+          await messenger.handlePlatformMessage(
+            channel.name,
+            channel.codec.encodeMethodCall(
+              MethodCall('onAdEvent', {'adId': adId, 'eventName': name}),
+            ),
+            (_) {},
+          );
+          await tester.pump();
+        }
+
+        final policy = CompletionAdPolicy(
+          DateTime.now().subtract(const Duration(minutes: 3)),
+        )..completions = 2;
+        final ads = CompletionAds(policy: policy, service: GoogleAdsService());
+        addTearDown(ads.dispose);
+        ads.start();
+        await tester.pump();
+        expect(loads, 1);
+        // A completed task while loading must never turn into a delayed display.
+        await ads.completed();
+        expect(shows, 0);
+        await event('onAdLoaded');
+        expect(shows, 0);
+        consent.allowed = false;
+        await ads.completed();
+        expect(shows, 0);
+        consent.allowed = true;
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+        await ads.completed();
+        expect(shows, 0);
+        tester.binding.handleAppLifecycleStateChanged(
+          AppLifecycleState.resumed,
+        );
+        final finished = ads.completed();
+        await tester.pump();
+        expect(shows, 1);
+        await event('onAdShowedFullScreenContent');
+        expect(policy.shown, 1);
+        await event('onAdDismissedFullScreenContent');
+        await finished;
+        await tester.pump();
+        expect(loads, 2);
+        await event('onAdLoaded');
+        await ads.completed();
+        expect(shows, 1);
+      },
+    );
+
     testWidgets('no fill retries with backoff and stops when removed', (
       tester,
     ) async {

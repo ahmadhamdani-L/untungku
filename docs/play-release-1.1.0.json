@@ -1,0 +1,41 @@
+{
+  "package": "id.untungku.untungku_pro",
+  "version": "1.1.0",
+  "versionCode": 5,
+  "aab": "build/release/UntungKu-Pro-1.1.0-code5-production.aab",
+  "bytes": 66817633,
+  "sha256": "5638fee7c1b27d746b040fd69bf96dcdf764f988d52722bbec43b1ac6d6ccc78",
+  "signing": "existing owner upload key; jarsigner verified",
+  "bundletool": "validation passed",
+  "adsProfile": "owner",
+  "screenshots": {
+    "phone": 8,
+    "tablet7": 8
+  },
+  "privacyPublished": "https://ddd-dream-develop-digital.vercel.app/untungku-pro/privacy/",
+  "privacyCommit": "77df8e9",
+  "status": "submitted; Google quick checks running before review",
+  "productionBinaryChecks": {
+    "owner_banner": true,
+    "owner_interstitial": true,
+    "no_screenshot_fixture": true,
+    "bundled_privacy": true
+  },
+  "storeAssetAiDeclaration": "feature graphic labeled AI-assisted; actual screenshots not labeled as generated",
+  "consoleStatus": "Perubahan yang sedang ditinjau",
+  "submittedAt": "2026-11-03T19:59:15.177426+07:00",
+  "consoleUrl": "https://play.google.com/console/u/0/developers/5449916773924433827/app/4972755704580858789/publishing",
+  "managedPublishing": false,
+  "automaticPublicationAfterApproval": true,
+  "rolloutPercent": 100,
+  "countryAvailability": "all previously targeted countries (unchanged)",
+  "submittedChangeCount": 6,
+  "submittedChanges": [
+    "production release code 5",
+    "Indonesian short description",
+    "Indonesian full description",
+    "8 phone screenshots",
+    "8 tablet screenshots",
+    "feature graphic"
+  ]
+}

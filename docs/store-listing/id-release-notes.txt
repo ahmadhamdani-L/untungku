@@ -1,7 +1,7 @@
 <id>
-Rilis awal UntungKu Pro.
-• Pencatatan produk, stok, penjualan, dan pengeluaran.
-• Dashboard serta kalkulator estimasi laba.
-• Ekspor CSV, backup dan pemulihan JSON.
-• Tema terang/gelap dan kebijakan privasi yang dapat dibaca offline.
+• Tampilan baru yang lebih ringkas dengan grafik tren pendapatan.
+• Piutang pelanggan, jatuh tempo, serta pembayaran bertahap.
+• Detail penjualan dan riwayat pelunasan lebih jelas.
+• Backup dan CSV menyertakan data piutang serta pembayaran.
+• Banner dan iklan layar penuh setelah pencatatan berhasil, dengan batas frekuensi.
 </id>

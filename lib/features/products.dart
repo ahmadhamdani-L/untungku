@@ -24,7 +24,7 @@ class _ProductsState extends ConsumerState<ProductsPage> {
                   p.archived == archived &&
                   (selectedCategory == 'Semua' ||
                       p.category == selectedCategory) &&
-                  '${p.name} ${p.sku}'.toLowerCase().contains(
+                  '${p.name} ${p.sku} ${p.barcode}'.toLowerCase().contains(
                     query.toLowerCase(),
                   ),
             )
@@ -98,12 +98,47 @@ class _ProductsState extends ConsumerState<ProductsPage> {
                 p.name,
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
-              subtitle: Text(
-                '${p.category.isEmpty ? 'Tanpa kategori' : p.category} • ${p.sku}\n${rupiah(p.price)} • Stok ${p.stock}',
-                style: TextStyle(
-                  height: 1.6,
-                  color: p.stock <= p.threshold ? Colors.orange : null,
-                ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    [
+                      p.category.isEmpty ? 'Tanpa kategori' : p.category,
+                      if (p.sku.isNotEmpty) p.sku,
+                    ].join(' • '),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    rupiah(p.price),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: Theme.of(c).colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: p.stock <= p.threshold
+                          ? Theme.of(c).colorScheme.errorContainer
+                          : Theme.of(c).colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Stok ${p.stock}${p.stock <= p.threshold ? ' • Perlu restok' : ''}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: p.stock <= p.threshold
+                            ? Theme.of(c).colorScheme.onErrorContainer
+                            : Theme.of(c).colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                  ),
+                ],
               ),
               isThreeLine: true,
               onTap: () => Navigator.push(
@@ -141,8 +176,9 @@ class _ProductsState extends ConsumerState<ProductsPage> {
 
 Future<void> stockDialog(BuildContext c, Store store, Product p) async {
   bool busy = false;
+  final operationId = uuid.v4();
   final delta = TextEditingController(), reason = TextEditingController();
-  await showDialog(
+  await formDialog(
     context: c,
     builder: (d) => AlertDialog(
       title: Text('Stok ${p.name}'),
@@ -193,7 +229,12 @@ Future<void> stockDialog(BuildContext c, Store store, Product p) async {
             if (busy) return;
             busy = true;
             try {
-              await store.adjustStock(p.id, int.parse(delta.text), reason.text);
+              await store.adjustStock(
+                p.id,
+                int.parse(delta.text),
+                reason.text,
+                operationId: operationId,
+              );
               if (d.mounted) Navigator.pop(d);
             } catch (_) {
               busy = false;
@@ -211,7 +252,8 @@ Future<void> stockDialog(BuildContext c, Store store, Product p) async {
 
 class ProductForm extends ConsumerStatefulWidget {
   final Product? product;
-  const ProductForm({super.key, this.product});
+  final String? initialBarcode;
+  const ProductForm({super.key, this.product, this.initialBarcode});
   @override
   ConsumerState<ProductForm> createState() => _ProductFormState();
 }
@@ -219,6 +261,8 @@ class ProductForm extends ConsumerStatefulWidget {
 class _ProductFormState extends ConsumerState<ProductForm> {
   final key = GlobalKey<FormState>();
   late final String productId, createdAt;
+  late final TextEditingController barcode;
+  bool favorite = false;
   late final List<TextEditingController> fields;
   bool busy = false;
   @override
@@ -226,6 +270,10 @@ class _ProductFormState extends ConsumerState<ProductForm> {
     super.initState();
     final p = widget.product;
     productId = p?.id ?? uuid.v4();
+    barcode = TextEditingController(
+      text: p?.barcode ?? widget.initialBarcode ?? '',
+    );
+    favorite = p?.favorite ?? false;
     createdAt = p?.created ?? DateTime.now().toIso8601String();
     fields = [
       p?.name ?? '',
@@ -242,6 +290,7 @@ class _ProductFormState extends ConsumerState<ProductForm> {
 
   @override
   void dispose() {
+    barcode.dispose();
     for (final f in fields) {
       f.dispose();
     }
@@ -259,7 +308,24 @@ class _ProductFormState extends ConsumerState<ProductForm> {
           key: key,
           child: Column(
             children: [
-              for (int i = 0; i < fields.length; i++)
+              for (int i = 0; i < fields.length; i++) ...[
+                if ([0, 3, 7].contains(i))
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        i == 0
+                            ? 'Identitas produk'
+                            : i == 3
+                            ? 'Harga & biaya per unit'
+                            : 'Persediaan',
+                        style: Theme.of(c).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),
                   child: TextFormField(
@@ -299,6 +365,37 @@ class _ProductFormState extends ConsumerState<ProductForm> {
                     },
                   ),
                 ),
+              ],
+              TextFormField(
+                controller: barcode,
+                decoration: InputDecoration(
+                  labelText: 'Barcode (opsional)',
+                  suffixIcon: IconButton(
+                    tooltip: 'Pindai barcode produk',
+                    icon: const Icon(Icons.qr_code_scanner),
+                    onPressed: () async {
+                      final code = await Navigator.push<String>(
+                        c,
+                        MaterialPageRoute(
+                          builder: (_) => const BarcodeScanPage(),
+                        ),
+                      );
+                      if (code != null && mounted) {
+                        setState(() => barcode.text = code);
+                      }
+                    },
+                  ),
+                ),
+                validator: (value) => (value ?? '').trim().length > 256
+                    ? 'Barcode maksimal 256 karakter'
+                    : null,
+              ),
+              SwitchListTile(
+                title: const Text('Produk favorit'),
+                value: favorite,
+                onChanged: (v) => setState(() => favorite = v),
+              ),
+              const SizedBox(height: 16),
               FilledButton(
                 onPressed: busy
                     ? null
@@ -318,6 +415,8 @@ class _ProductFormState extends ConsumerState<ProductForm> {
                                   id: productId,
                                   name: fields[0].text.trim(),
                                   sku: fields[1].text.trim(),
+                                  barcode: barcode.text.trim(),
+                                  favorite: favorite,
                                   category: fields[2].text.trim(),
                                   cost: n(3),
                                   price: n(4),

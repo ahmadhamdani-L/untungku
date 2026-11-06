@@ -1,0 +1,74 @@
+{
+  "app_version": "1.1.0",
+  "version_code": 5,
+  "capture_date": "2026-11-03",
+  "device": "Android emulator phone",
+  "capture": "Actual Flutter Android application surface via integration_test; opaque alpha removed only; no crop or resizing",
+  "data": "Explicitly labeled example business in an in-memory database; absent from production startup",
+  "files": [
+    {
+      "name": "01-dashboard.png",
+      "dimensions": [
+        1080,
+        1920
+      ],
+      "sha256": "595f015f4e4beb7ba4af35e49488bb991cac9cf149800ac0d9340ebed083064f"
+    },
+    {
+      "name": "02-insights.png",
+      "dimensions": [
+        1080,
+        1920
+      ],
+      "sha256": "1bf87b066b9b22ebb7a8dedfd1c492a9422b4948c08d14947eee38b30dd5f88c"
+    },
+    {
+      "name": "03-products.png",
+      "dimensions": [
+        1080,
+        1920
+      ],
+      "sha256": "5dc98f78c6bac9db1a2b8ad5fb2cd42fe64551bc46116324ac128dcfbd5f57c3"
+    },
+    {
+      "name": "04-transactions.png",
+      "dimensions": [
+        1080,
+        1920
+      ],
+      "sha256": "2590a65e21cc49df3191508919e7c86f6c17410da7c54492a880345d9f5f4f88"
+    },
+    {
+      "name": "05-receivables.png",
+      "dimensions": [
+        1080,
+        1920
+      ],
+      "sha256": "f7fa3ac8be53f62261107b98a34a7f0c7f95aca2a75c36648d53546e9685090f"
+    },
+    {
+      "name": "06-sale-detail.png",
+      "dimensions": [
+        1080,
+        1920
+      ],
+      "sha256": "cc397afa42418860f801a764d139c941223047b1a2d6642b8ddd987d5cf14107"
+    },
+    {
+      "name": "07-calculator.png",
+      "dimensions": [
+        1080,
+        1920
+      ],
+      "sha256": "e660c56995cc3d4cc50ee3c7a9d5588552182d928ad5cd4d0a364e8ee9567ddc"
+    },
+    {
+      "name": "08-backup.png",
+      "dimensions": [
+        1080,
+        1920
+      ],
+      "sha256": "9034e82f094f3a6c060ef1f6718abc762ece49e54932fd90795f1d507fb1f2ad"
+    }
+  ]
+}

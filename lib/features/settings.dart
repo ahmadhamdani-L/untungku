@@ -116,16 +116,64 @@ class _SettingsState extends ConsumerState<SettingsPage> {
             }),
           ),
           const SizedBox(height: 28),
+          ListTile(
+            leading: const Icon(Icons.print_outlined),
+            title: const Text('Pengaturan printer'),
+            onTap: () => Navigator.push(
+              c,
+              MaterialPageRoute(builder: (_) => const PrinterSettingsPage()),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.lock_outline),
+            title: const Text('Keamanan PIN'),
+            onTap: () => Navigator.push(
+              c,
+              MaterialPageRoute(builder: (_) => const PinSettingsPage()),
+            ),
+          ),
           Text('Backup & ekspor', style: Theme.of(c).textTheme.titleLarge),
           const SizedBox(height: 8),
           const Text(
             'Data hanya tersimpan di perangkat ini. Uninstall atau kehilangan perangkat dapat menghapus data. Simpan backup di lokasi aman secara berkala.',
           ),
           ListTile(
+            leading: const Icon(Icons.enhanced_encryption_outlined),
+            title: const Text('Simpan backup terenkripsi'),
+            subtitle: const Text(
+              'Dilindungi password; diperlukan untuk pemulihan',
+            ),
+            onTap: busy
+                ? null
+                : () => action(c, () async {
+                    final password = await backupPassword(
+                      c,
+                      confirmation: true,
+                    );
+                    if (password == null) return;
+                    setState(() => busy = true);
+                    try {
+                      final encrypted = await BackupCipher.encrypt(
+                        store.backup(),
+                        password,
+                      );
+                      if (c.mounted) {
+                        await export(
+                          c,
+                          encrypted,
+                          'untungku-terenkripsi-${DateTime.now().millisecondsSinceEpoch}.json',
+                        );
+                      }
+                    } finally {
+                      if (mounted) setState(() => busy = false);
+                    }
+                  }),
+          ),
+          ListTile(
             leading: const Icon(Icons.download_outlined),
             title: const Text('Simpan backup JSON'),
             subtitle: const Text(
-              'Termasuk produk, transaksi, stok, dan pengaturan',
+              'Tanpa enkripsi. Berisi seluruh catatan usaha; simpan di lokasi aman.',
             ),
             onTap: busy
                 ? null
@@ -161,17 +209,31 @@ class _SettingsState extends ConsumerState<SettingsPage> {
                     if (f == null) {
                       return;
                     }
-                    if ((await f.length() ?? 0) > 20000000) {
+                    if ((await f.length() ?? 0) > 28000000) {
                       throw const FormatException('Backup terlalu besar');
                     }
                     final buffer = BytesBuilder(copy: false);
                     await for (final chunk in f.readAsByteStream()) {
-                      if (buffer.length + chunk.length > 20000000) {
+                      if (buffer.length + chunk.length > 28000000) {
                         throw const FormatException('Backup terlalu besar');
                       }
                       buffer.add(chunk);
                     }
-                    final source = utf8.decode(buffer.takeBytes());
+                    var source = utf8.decode(buffer.takeBytes());
+                    if (BackupCipher.isEncrypted(source)) {
+                      if (!c.mounted) return;
+                      final password = await backupPassword(
+                        c,
+                        confirmation: false,
+                      );
+                      if (password == null) return;
+                      setState(() => busy = true);
+                      try {
+                        source = await BackupCipher.decrypt(source, password);
+                      } finally {
+                        if (mounted) setState(() => busy = false);
+                      }
+                    }
                     final b = Store.validateBackup(source);
                     if (!c.mounted) {
                       return;
@@ -281,7 +343,7 @@ class _SettingsState extends ConsumerState<SettingsPage> {
           const AdPrivacyOptions(),
           const ListTile(
             leading: Icon(Icons.info_outline),
-            title: Text('UntungKu Pro 1.0.1'),
+            title: Text('UntungKu Pro 2.0.0'),
             subtitle: Text(
               'Estimasi laba bukan nasihat keuangan. Retur parsial: revisi transaksi. Pembatalan penuh mengembalikan stok. Stok minus ditolak secara default dan hanya diizinkan melalui pengaturan eksplisit.',
             ),

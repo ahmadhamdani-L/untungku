@@ -9,6 +9,7 @@ import subprocess
 parser = argparse.ArgumentParser()
 parser.add_argument('--credentials', required=True, type=Path)
 parser.add_argument('--owner-ads', action='store_true', help='Use the supplied AdMob IDs')
+parser.add_argument('--format', choices=['aab', 'apk', 'both'], default='aab', help='Local signed output formats')
 args = parser.parse_args()
 credentials = json.loads(args.credentials.read_text())
 key = Path(credentials['keystore_path']).expanduser().resolve()
@@ -28,6 +29,7 @@ env.update({
 subprocess.run(['python3', 'tool/validate_release.py'], env=env, check=True)
 # Keep pub enabled: Flutter must regenerate release-only plugin registration
 # after integration tests (dev plugins must not leak into the release).
-subprocess.run(['flutter', 'build', 'appbundle', '--release',
-                '--dart-define-from-file=' + profile], env=env, check=True)
-print('Signed AAB: build/app/outputs/bundle/release/app-release.aab')
+for output in (['appbundle', 'apk'] if args.format == 'both' else ['appbundle' if args.format == 'aab' else 'apk']):
+    subprocess.run(['flutter', '--no-version-check', 'build', output, '--release',
+                    '--dart-define-from-file=' + profile], env=env, check=True)
+    print('Signed local artifact built: ' + output)

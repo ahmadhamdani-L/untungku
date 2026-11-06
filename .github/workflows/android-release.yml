@@ -8,7 +8,7 @@ on:
         required: true
         default: false
       ad_profile:
-        description: 'Ad profile (owner uses supplied IDs; no automatic full-screen ads)'
+        description: 'Ad profile (owner enables banner and capped completion interstitials)'
         type: choice
         options: [offline, google-test, owner]
         default: offline

@@ -1,6 +1,6 @@
 {
   "title": "Kebijakan Privasi UntungKu Pro",
-  "updated": "20 Oktober 2026",
+  "updated": "3 November 2026",
   "operator": "PT DDD DREAM DEVELOP DIGITAL",
   "developer": "Lelouch D",
   "email": "hmdhmdndani@gmail.com",
@@ -11,7 +11,7 @@
     },
     {
       "title": "Data usaha yang Anda masukkan",
-      "text": "Nama usaha, produk, harga, stok, transaksi, pengeluaran, catatan, dan preferensi disimpan secara lokal di penyimpanan aplikasi pada perangkat Anda. Aplikasi tidak memiliki server bisnis untuk menerima database tersebut dan tidak mengirim isi transaksi ke AdMob untuk permintaan iklan. Perhitungan laba dan pencatatan usaha dapat berjalan tanpa internet. Kami tidak memperoleh akses jarak jauh ke database lokal Anda."
+      "text": "Nama usaha, produk, harga, stok, transaksi, nama pelanggan, piutang, riwayat pembayaran, pengeluaran, catatan, dan preferensi disimpan secara lokal di penyimpanan aplikasi pada perangkat Anda. Aplikasi tidak memiliki server bisnis untuk menerima database tersebut dan tidak mengirim isi transaksi ke AdMob untuk permintaan iklan. Perhitungan laba dan pencatatan usaha dapat berjalan tanpa internet. Kami tidak memperoleh akses jarak jauh ke database lokal Anda."
     },
     {
       "title": "Backup, ekspor, dan data yang Anda bagikan",
@@ -19,7 +19,7 @@
     },
     {
       "title": "Iklan Google AdMob dan data perangkat",
-      "text": "Versi beriklan menggunakan Google Mobile Ads (AdMob) untuk menampilkan banner pada halaman Pengaturan. SDK Google dapat mengumpulkan atau memproses informasi perangkat dan aplikasi, alamat IP dan perkiraan lokasi yang diturunkan dari IP, pengenal yang tersedia, interaksi iklan, serta data diagnostik untuk penayangan, pengukuran, keamanan, dan pencegahan penyalahgunaan iklan. Data tersebut diproses oleh Google dan mitra periklanan sesuai konfigurasi layanan, wilayah, dan pilihan privasi pengguna. Aplikasi tidak mengirimkan isi database usaha sebagai bagian dari permintaan iklan. Build offline/mock tidak melakukan permintaan iklan Google."
+      "text": "Versi beriklan menggunakan Google Mobile Ads (AdMob) untuk menampilkan banner di atas navigasi utama dan iklan layar penuh pada konfirmasi selesai setelah penjualan, pengeluaran, atau pelunasan berhasil disimpan. Iklan layar penuh dibatasi frekuensinya dan dilewati saat belum tersedia. SDK Google dapat mengumpulkan atau memproses informasi perangkat dan aplikasi, alamat IP dan perkiraan lokasi yang diturunkan dari IP, pengenal yang tersedia, interaksi iklan, serta data diagnostik untuk penayangan, pengukuran, keamanan, dan pencegahan penyalahgunaan iklan. Data tersebut diproses oleh Google dan mitra periklanan sesuai konfigurasi layanan, wilayah, dan pilihan privasi pengguna. Aplikasi tidak mengirimkan isi database usaha sebagai bagian dari permintaan iklan. Build offline/mock tidak melakukan permintaan iklan Google."
     },
     {
       "title": "Persetujuan dan pilihan privasi iklan",

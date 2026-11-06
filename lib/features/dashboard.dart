@@ -60,42 +60,70 @@ class _DashboardState extends ConsumerState<Dashboard> {
       ..sort((a, b) => b.value.compareTo(a.value));
     return PageBody(
       children: [
-        heading(c, 'Kabar usaha Anda', 'Angka nyata, keputusan lebih terarah.'),
-        Wrap(
-          spacing: 8,
+        heading(
+          c,
+          'Kabar usaha Anda',
+          DateFormat('EEEE, dd MMMM yyyy', 'id_ID').format(now),
+        ),
+        Row(
           children: [
-            for (final d in [1, 7, 30])
-              ChoiceChip(
-                label: Text(d == 1 ? 'Hari ini' : '$d hari'),
-                selected: range == null && days == d,
-                onSelected: (_) => setState(() {
-                  days = d;
-                  range = null;
-                }),
+            Expanded(
+              child: FilledButton.icon(
+                onPressed: () => Navigator.push(
+                  c,
+                  MaterialPageRoute(builder: (_) => const SaleForm()),
+                ),
+                icon: const Icon(Icons.add),
+                label: const Text('Catat penjualan'),
               ),
-            ActionChip(
-              label: Text(
-                range == null
-                    ? 'Pilih tanggal'
-                    : '${DateFormat('dd/MM').format(range!.start)}–${DateFormat('dd/MM').format(range!.end)}',
-              ),
-              avatar: const Icon(Icons.date_range, size: 18),
-              onPressed: () async {
-                final value = await showDateRangePicker(
-                  context: c,
-                  firstDate: DateTime(2020),
-                  lastDate: DateTime.now(),
-                );
-                if (value != null) {
-                  setState(() => range = value);
-                }
-              },
+            ),
+            const SizedBox(width: 12),
+            IconButton.filledTonal(
+              tooltip: 'Catat pengeluaran',
+              onPressed: () => expenseDialog(c, store),
+              icon: const Icon(Icons.remove),
             ),
           ],
         ),
         const SizedBox(height: 20),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            spacing: 8,
+            children: [
+              for (final d in [1, 7, 30])
+                ChoiceChip(
+                  label: Text(d == 1 ? 'Hari ini' : '$d hari'),
+                  selected: range == null && days == d,
+                  onSelected: (_) => setState(() {
+                    days = d;
+                    range = null;
+                  }),
+                ),
+              ActionChip(
+                label: Text(
+                  range == null
+                      ? 'Pilih tanggal'
+                      : '${DateFormat('dd/MM').format(range!.start)}–${DateFormat('dd/MM').format(range!.end)}',
+                ),
+                avatar: const Icon(Icons.date_range, size: 18),
+                onPressed: () async {
+                  final value = await showDateRangePicker(
+                    context: c,
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime.now(),
+                  );
+                  if (value != null) {
+                    setState(() => range = value);
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
         Container(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               colors: [Color(0xFF07583F), Color(0xFF10966B)],
@@ -119,12 +147,12 @@ class _DashboardState extends ConsumerState<Dashboard> {
                   rupiah(revenue),
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 36,
+                    fontSize: 32,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 12),
               Text(
                 '${sales.length} transaksi  •  $units unit terjual\n$comparison',
                 style: const TextStyle(color: Colors.white),
@@ -148,7 +176,7 @@ class _DashboardState extends ConsumerState<Dashboard> {
                   width: (box.maxWidth - 12) / 2,
                   child: Card(
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(14),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -175,15 +203,101 @@ class _DashboardState extends ConsumerState<Dashboard> {
             ],
           ),
         ),
-        const SizedBox(height: 24),
-        FilledButton.icon(
-          onPressed: () => Navigator.push(
-            c,
-            MaterialPageRoute(builder: (_) => const SaleForm()),
+        const SizedBox(height: 16),
+        Card(
+          child: ListTile(
+            contentPadding: const EdgeInsets.all(16),
+            leading: const CircleAvatar(
+              child: Icon(Icons.account_balance_wallet_outlined),
+            ),
+            title: const Text('Piutang pelanggan'),
+            subtitle: Text(
+              rupiah(
+                store.sales
+                    .where((s) => s.credit && !s.voided)
+                    .fold(0, (v, s) => v + s.outstanding),
+              ),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.push(
+              c,
+              MaterialPageRoute(builder: (_) => const ReceivablesPage()),
+            ),
           ),
-          icon: const Icon(Icons.add),
-          label: const Text('Catat penjualan'),
         ),
+        const SizedBox(height: 16),
+        FutureBuilder<List<CashMovementRow>>(
+          future: store.cashLedger(),
+          builder: (context, snapshot) {
+            final received = (snapshot.data ?? <CashMovementRow>[])
+                .where(
+                  (r) =>
+                      inPeriod(r.date) &&
+                      {
+                        'sale_receipt',
+                        'sale_receipt_revision',
+                        'receivable_collection',
+                        'legacy_sale_receipt',
+                        'legacy_collection',
+                      }.contains(r.category),
+                )
+                .fold<int>(0, (v, r) => v + r.amount);
+            return Card(
+              child: ListTile(
+                leading: const Icon(Icons.payments_outlined),
+                title: const Text('Penerimaan penjualan'),
+                subtitle: const Text(
+                  'Pembayaran tercatat pada periode terpilih; refund ditampilkan di arus kas',
+                ),
+                trailing: Text(
+                  snapshot.hasData ? rupiah(received) : '...',
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+              ),
+            );
+          },
+        ),
+        FutureBuilder(
+          future: store.payableReport(),
+          builder: (context, snapshot) => Card(
+            child: ListTile(
+              leading: const Icon(Icons.local_shipping_outlined),
+              title: const Text('Utang pemasok'),
+              subtitle: Text(
+                snapshot.hasData
+                    ? rupiah(
+                        snapshot.data!.fold<int>(
+                          0,
+                          (v, r) => v + r.outstanding,
+                        ),
+                      )
+                    : 'Memuat...',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.push(
+                c,
+                MaterialPageRoute(builder: (_) => const PurchasesPage()),
+              ),
+            ),
+          ),
+        ),
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.insights_outlined),
+            title: const Text('Asisten usaha offline'),
+            subtitle: const Text(
+              'Tren, restok, margin dan tagihan dari catatan usaha',
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.push(
+              c,
+              MaterialPageRoute(builder: (_) => const BusinessInsightsPage()),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        RevenueTrend(sales: sales, start: start, end: end),
         const SizedBox(height: 24),
         Text('Produk terlaris', style: Theme.of(c).textTheme.titleLarge),
         if (ranking.isEmpty)
@@ -203,8 +317,12 @@ class _DashboardState extends ConsumerState<Dashboard> {
         if (low.isNotEmpty) ...[
           const SizedBox(height: 20),
           Text('Perlu restok', style: Theme.of(c).textTheme.titleLarge),
-          for (final p in low)
+          for (final p in low.take(5))
             ListTile(
+              onTap: () => Navigator.push(
+                c,
+                MaterialPageRoute(builder: (_) => ProductForm(product: p)),
+              ),
               title: Text(p.name),
               trailing: Text(
                 '${p.stock} tersisa',

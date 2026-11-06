@@ -1,0 +1,19 @@
+{
+  "package": "id.untungku.untungku_pro",
+  "observedAt": "2026-11-06T07:32:51.959531+07:00",
+  "source": "authenticated Google Play Console / all app bundles",
+  "consoleUrl": "https://play.google.com/console/u/0/developers/5449916773924433827/app/4972755704580858789/bundle-explorer-selector",
+  "observedVersionCodes": [
+    5,
+    4,
+    3,
+    2
+  ],
+  "allPagesInspected": true,
+  "totalVersions": 4,
+  "highestUsedVersionCode": 5,
+  "selectedNextVersionCode": 6,
+  "selectedVersionName": "2.0.0",
+  "productionAuthorizedByUser": true,
+  "physicalCameraPrinterValidationPending": true
+}

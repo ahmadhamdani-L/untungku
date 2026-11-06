@@ -31,7 +31,7 @@ class _TransactionsState extends ConsumerState<TransactionsPage> {
         for (final s in store.sales.where(
           (s) => match(
             s.date,
-            '${s.id} ${s.note} ${s.lines.map((l) => l.name).join(' ')}',
+            '${s.id} ${s.customer} ${s.note} ${s.lines.map((l) => l.name).join(' ')}',
           ),
         ))
           (
@@ -50,7 +50,7 @@ class _TransactionsState extends ConsumerState<TransactionsPage> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 subtitle: Text(
-                  '${DateFormat('dd MMM yyyy • HH:mm', 'id_ID').format(DateTime.parse(s.date).toLocal())}\n${s.payment} • ${s.voided
+                  '${DateFormat('dd MMM yyyy • HH:mm', 'id_ID').format(DateTime.parse(s.date).toLocal())}\n${s.payment} • ${s.credit ? '${s.paymentStatus} • ${s.customer} • ' : ''}${s.voided
                       ? 'Dibatalkan'
                       : s.note.isEmpty
                       ? 'Penjualan'
@@ -58,48 +58,10 @@ class _TransactionsState extends ConsumerState<TransactionsPage> {
                 ),
                 isThreeLine: true,
                 trailing: Text(rupiah(s.result.revenue)),
-                onTap: () => showDialog(
-                  context: c,
-                  builder: (d) => AlertDialog(
-                    title: const Text('Detail penjualan'),
-                    content: Text(
-                      '${s.lines.map((l) => '${l.name} × ${l.quantity}: ${rupiah(l.price * l.quantity)}').join('\n')}\n\nPendapatan: ${rupiah(s.result.revenue)}\nEstimasi laba: ${rupiah(s.result.net)}\nDiskon: ${rupiah(s.discount)}\nBiaya: ${rupiah(s.result.fees + s.fixed)}\n${s.note}',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(d),
-                        child: const Text('Tutup'),
-                      ),
-                      if (!s.voided) ...[
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(d);
-                            Navigator.push(
-                              c,
-                              MaterialPageRoute(
-                                builder: (_) => SaleForm(sale: s),
-                              ),
-                            );
-                          },
-                          child: const Text('Edit'),
-                        ),
-                        TextButton(
-                          onPressed: () async {
-                            Navigator.pop(d);
-                            if (await confirm(
-                              c,
-                              'Batalkan penjualan?',
-                              'Stok akan dikembalikan satu kali. Riwayat tetap disimpan.',
-                            )) {
-                              if (c.mounted) {
-                                await action(c, () => store.voidSale(s.id));
-                              }
-                            }
-                          },
-                          child: const Text('Batalkan'),
-                        ),
-                      ],
-                    ],
+                onTap: () => Navigator.push(
+                  c,
+                  MaterialPageRoute(
+                    builder: (_) => SaleDetailPage(saleId: s.id),
                   ),
                 ),
               ),
@@ -211,12 +173,18 @@ class _TransactionsState extends ConsumerState<TransactionsPage> {
 
 Future<void> expenseDialog(BuildContext c, Store store, [Expense? e]) async {
   final expenseId = e?.id ?? uuid.v4();
+  final accounts = await store.cashAccounts();
+  final existingTotals = e == null
+      ? <String?, int>{}
+      : await store.expenseCashTotals(e.id);
+  String? accountId = existingTotals.entries.singleOrNull?.key;
+  if (!c.mounted) return;
   final category = TextEditingController(text: e?.category ?? ''),
       amount = TextEditingController(text: e?.amount.toString() ?? ''),
       note = TextEditingController(text: e?.note ?? '');
   var date = e == null ? DateTime.now() : DateTime.parse(e.date);
   bool busy = false;
-  await showDialog(
+  await formDialog(
     context: c,
     builder: (d) => StatefulBuilder(
       builder: (d, set) => AlertDialog(
@@ -234,6 +202,12 @@ Future<void> expenseDialog(BuildContext c, Store store, [Expense? e]) async {
                 controller: amount,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'Jumlah (Rp)'),
+              ),
+              const SizedBox(height: 12),
+              accountDropdown(
+                accounts,
+                accountId,
+                (value) => set(() => accountId = value),
               ),
               const SizedBox(height: 12),
               TextField(
@@ -298,11 +272,18 @@ Future<void> expenseDialog(BuildContext c, Store store, [Expense? e]) async {
                           date: date.toIso8601String(),
                           category: category.text.trim(),
                           note: note.text,
-                          amount: int.parse(amount.text),
+                          amount: parseIntegerInput(amount.text, 'Jumlah'),
                         ),
+                        accountId: accountId,
                       );
                       if (d.mounted) {
                         Navigator.pop(d);
+                        if (c.mounted && e == null) {
+                          await showSaveSuccess(
+                            c,
+                            'Pengeluaran berhasil disimpan',
+                          );
+                        }
                       }
                     } finally {
                       if (d.mounted) {
@@ -340,15 +321,33 @@ class CartEntry {
 
 class SaleForm extends ConsumerStatefulWidget {
   final Sale? sale;
-  const SaleForm({super.key, this.sale});
+  final Map<String, int> initialCart;
+  final bool previewAfterSave;
+  const SaleForm({
+    super.key,
+    this.sale,
+    this.initialCart = const {},
+    this.previewAfterSave = false,
+  });
   @override
   ConsumerState<SaleForm> createState() => _SaleFormState();
 }
 
 class _SaleFormState extends ConsumerState<SaleForm> {
   final cart = <CartEntry>[];
-  late final String saleId;
-  late final TextEditingController discount, fixed, fee, note;
+  late final String saleId, checkoutOperationId;
+  late final Future<List<Contact>> availableCustomers;
+  late final Future<List<CashAccount>> availableAccounts;
+  String? accountId;
+  String? customerId;
+  late final TextEditingController discount,
+      fixed,
+      fee,
+      note,
+      customer,
+      initialPaid;
+  bool credit = false;
+  String? dueDate;
   String payment = 'Tunai';
   bool busy = false;
   late DateTime date;
@@ -357,6 +356,10 @@ class _SaleFormState extends ConsumerState<SaleForm> {
     super.initState();
     final s = widget.sale;
     saleId = s?.id ?? uuid.v4();
+    checkoutOperationId = uuid.v4();
+    availableCustomers = ref.read(storeProvider).contacts();
+    availableAccounts = ref.read(storeProvider).cashAccounts();
+    accountId = s?.accountId;
     discount = TextEditingController(text: (s?.discount ?? 0).toString());
     fixed = TextEditingController(text: (s?.fixed ?? 0).toString());
     fee = TextEditingController(
@@ -366,7 +369,20 @@ class _SaleFormState extends ConsumerState<SaleForm> {
     );
     note = TextEditingController(text: s?.note ?? '');
     payment = s?.payment ?? 'Tunai';
+    customer = TextEditingController(text: s?.customer ?? '');
+    initialPaid = TextEditingController(text: '0');
+    credit = s?.credit ?? false;
+    dueDate = s?.dueDate;
     date = s == null ? DateTime.now() : DateTime.parse(s.date);
+    if (s == null) {
+      for (final entry in widget.initialCart.entries) {
+        final item = CartEntry(
+          ref.read(storeProvider).products.firstWhere((p) => p.id == entry.key),
+        );
+        item.quantity.text = entry.value.toString();
+        cart.add(item);
+      }
+    }
     if (s != null) {
       for (final l in s.lines) {
         cart.add(
@@ -387,7 +403,7 @@ class _SaleFormState extends ConsumerState<SaleForm> {
     for (final e in cart) {
       e.dispose();
     }
-    for (final e in [discount, fixed, fee, note]) {
+    for (final e in [discount, fixed, fee, note, customer, initialPaid]) {
       e.dispose();
     }
     super.dispose();
@@ -413,7 +429,24 @@ class _SaleFormState extends ConsumerState<SaleForm> {
     fixed: int.parse(fixed.text),
     feeBps: parseBps(fee.text),
     payment: payment,
+    accountId: accountId,
     note: note.text,
+    customer: customer.text.trim(),
+    credit: credit,
+    dueDate: credit ? dueDate : null,
+    payments:
+        widget.sale?.payments ??
+        (credit && int.parse(initialPaid.text) > 0
+            ? [
+                SalePayment(
+                  id: '$saleId-initial',
+                  date: date.toIso8601String(),
+                  amount: int.parse(initialPaid.text),
+                  method: payment,
+                  accountId: accountId,
+                ),
+              ]
+            : []),
   );
   @override
   Widget build(BuildContext c) {
@@ -518,23 +551,31 @@ class _SaleFormState extends ConsumerState<SaleForm> {
               ),
             ),
           const SizedBox(height: 16),
-          for (final pair in [
-            (discount, 'Diskon total penjual (Rp)'),
-            (fixed, 'Biaya tetap transaksi (Rp)'),
-            (fee, 'Biaya marketplace / pembayaran (%)'),
-            (note, 'Catatan'),
-          ])
-            Padding(
-              padding: const EdgeInsets.only(bottom: 14),
-              child: TextField(
-                controller: pair.$1,
-                keyboardType: pair.$1 == note
-                    ? TextInputType.text
-                    : const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(labelText: pair.$2),
-                onChanged: (_) => setState(() {}),
-              ),
-            ),
+          ExpansionTile(
+            tilePadding: EdgeInsets.zero,
+            title: const Text('Diskon, biaya & catatan'),
+            initiallyExpanded: widget.sale != null,
+            children: [
+              for (final pair in [
+                (discount, 'Diskon total penjual (Rp)'),
+                (fixed, 'Biaya tetap transaksi (Rp)'),
+                (fee, 'Biaya marketplace / pembayaran (%)'),
+                (note, 'Catatan'),
+              ])
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 14),
+                  child: TextField(
+                    controller: pair.$1,
+                    keyboardType: pair.$1 == note
+                        ? TextInputType.text
+                        : const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(labelText: pair.$2),
+                    onChanged: (_) => setState(() {}),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 16),
           DropdownButtonFormField<String>(
             initialValue: payment,
             decoration: const InputDecoration(labelText: 'Pembayaran'),
@@ -545,6 +586,144 @@ class _SaleFormState extends ConsumerState<SaleForm> {
               'Lainnya',
             ].map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
             onChanged: (v) => setState(() => payment = v!),
+          ),
+          const SizedBox(height: 16),
+          FutureBuilder<List<CashAccount>>(
+            future: availableAccounts,
+            builder: (c, snapshot) {
+              if (snapshot.hasError) {
+                return const Text('Akun kas tidak dapat dibuka');
+              }
+              if (!snapshot.hasData) return const LinearProgressIndicator();
+              return accountDropdown(
+                snapshot.data!,
+                accountId,
+                (value) => setState(() => accountId = value),
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          if (widget.sale == null) ...[
+            FutureBuilder<List<Contact>>(
+              future: availableCustomers,
+              builder: (c, snapshot) {
+                if (snapshot.hasError) {
+                  return const Text('Daftar pelanggan tidak dapat dibuka');
+                }
+                final contacts = (snapshot.data ?? [])
+                    .where((p) => !p.archived)
+                    .toList();
+                return DropdownButtonFormField<String>(
+                  initialValue: customerId,
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Pilih pelanggan (opsional)',
+                  ),
+                  items: [
+                    const DropdownMenuItem<String>(
+                      value: null,
+                      child: Text('Tanpa tautan pelanggan'),
+                    ),
+                    for (final p in contacts)
+                      DropdownMenuItem(
+                        value: p.id,
+                        child: Text(
+                          '${p.name}${p.phone.isEmpty ? '' : ' • ${p.phone}'}',
+                        ),
+                      ),
+                  ],
+                  onChanged: busy
+                      ? null
+                      : (value) => setState(() {
+                          customerId = value;
+                          if (value != null) {
+                            customer.text = contacts
+                                .firstWhere((p) => p.id == value)
+                                .name;
+                          }
+                        }),
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+          ],
+          Card(
+            child: Column(
+              children: [
+                SwitchListTile(
+                  title: const Text('Penjualan tempo / piutang'),
+                  subtitle: const Text(
+                    'Catat pembayaran bertahap dari pelanggan',
+                  ),
+                  value: credit,
+                  onChanged: widget.sale != null
+                      ? null
+                      : (v) => setState(() => credit = v),
+                ),
+                if (credit)
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: customer,
+                          readOnly: widget.sale != null || customerId != null,
+                          decoration: const InputDecoration(
+                            labelText: 'Nama pelanggan',
+                          ),
+                          onChanged: (_) => setState(() {}),
+                        ),
+                        const SizedBox(height: 14),
+                        if (widget.sale == null)
+                          TextField(
+                            controller: initialPaid,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              labelText: 'Pembayaran awal (Rp)',
+                            ),
+                            onChanged: (_) => setState(() {}),
+                          ),
+                        if (widget.sale != null)
+                          const Text(
+                            'Tambahkan pelunasan melalui detail penjualan. Data pelanggan dan jatuh tempo tetap disimpan.',
+                          ),
+                        TextButton.icon(
+                          onPressed: widget.sale != null
+                              ? null
+                              : () async {
+                                  final picked = await showDatePicker(
+                                    context: c,
+                                    initialDate: DateTime.now().add(
+                                      const Duration(days: 7),
+                                    ),
+                                    firstDate: date,
+                                    lastDate: DateTime(2200),
+                                  );
+                                  if (picked != null) {
+                                    setState(
+                                      () => dueDate = DateFormat(
+                                        'yyyy-MM-dd',
+                                      ).format(picked),
+                                    );
+                                  }
+                                },
+                          icon: const Icon(Icons.event),
+                          label: Text(
+                            dueDate == null
+                                ? 'Atur jatuh tempo (opsional)'
+                                : 'Jatuh tempo $dueDate',
+                          ),
+                        ),
+                        if (dueDate != null && widget.sale == null)
+                          TextButton(
+                            onPressed: () => setState(() => dueDate = null),
+                            child: const Text('Hapus jatuh tempo'),
+                          ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
           ),
           const SizedBox(height: 12),
           TextButton.icon(
@@ -583,9 +762,40 @@ class _SaleFormState extends ConsumerState<SaleForm> {
                     if (busy) return;
                     setState(() => busy = true);
                     try {
-                      await ref.read(storeProvider).saveSale(sale());
+                      if (widget.previewAfterSave &&
+                          !await confirm(
+                            c,
+                            'Konfirmasi checkout?',
+                            '${cart.length} jenis barang • ${rupiah(sale().result.revenue)}. Simpan penjualan dan posting stok satu kali.',
+                          )) {
+                        return;
+                      }
+                      await ref
+                          .read(storeProvider)
+                          .saveSale(
+                            sale(),
+                            checkoutOperationId: checkoutOperationId,
+                            customerId: customerId,
+                          );
                       if (c.mounted) {
+                        if (widget.previewAfterSave) {
+                          Navigator.pushReplacement<String, String>(
+                            c,
+                            MaterialPageRoute(
+                              builder: (_) => ReceiptPage(saleId: saleId),
+                            ),
+                            result: saleId,
+                          );
+                          return;
+                        }
+                        final parent = Navigator.of(c).context;
                         Navigator.pop(c);
+                        if (parent.mounted && widget.sale == null) {
+                          await showSaveSuccess(
+                            parent,
+                            'Penjualan berhasil disimpan',
+                          );
+                        }
                       }
                     } finally {
                       if (mounted) {

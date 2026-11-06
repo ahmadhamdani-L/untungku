@@ -1,7 +1,7 @@
-# Screenshot tablet 7 inci
+# Screenshot UntungKu Pro 1.1.0
 
-Lima PNG RGB 1200 × 1920 dari emulator Nexus 7 (2013), density 320 dpi. Aplikasi release 1.0.0 kode 2 dipasang dari APK universal yang dihasilkan dari AAB final yang sama. Capture menggunakan tool/capture_screen.py; tidak ada pembesaran, cropping, atau UI buatan.
+Delapan screenshot terbaru dari aplikasi Android berjalan, diambil 3 November 2026. Tablet Nexus 7 1200 × 1920, bukan screenshot ponsel yang diperbesar. Data usaha bertanda Contoh dibuat hanya dalam database memori pengujian. Produksi tetap tidak berisi data contoh.
 
-Unggah file 01–05 ke kolom Screenshot tablet 7 inci. Data bisnis awal kosong; kalkulator memakai simulasi harga Rp20.000 dan modal Rp10.000, bukan transaksi yang disisipkan ke database. Dashboard dan hasil kalkulator diperiksa secara visual. Salinan siap dipilih berada di ~/Downloads/UntungKu-Pro-Screenshot-Tablet-7-Inci.
+Urutan: dashboard, grafik dan ringkasan, produk, transaksi, piutang, detail penjualan, kalkulator, dan backup.
 
-01 dashboard; 02 produk; 03 transaksi; 04 kalkulator; 05 hasil kalkulator. Capture dilakukan dalam mode pesawat. Metadata dan checksum ada di capture-metadata.json. Kolom 10 inci dapat dikosongkan jika opsional.
+Reproduksi: `CAPTURE_OUTPUT_DIR=build/store-captures/tablet-7-inch flutter drive --no-pub --driver=test_driver/store_capture.dart --target=integration_test/store_screenshots_test.dart -d <emulator-id> --dart-define-from-file=config/development.json`. Metadata dan hash ada di `capture-metadata.json`.

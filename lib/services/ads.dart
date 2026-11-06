@@ -392,3 +392,211 @@ class AdPrivacyOptions extends StatelessWidget {
           ),
   );
 }
+
+/// Shared across all completion placements, never on validation failures or edits.
+class CompletionAdPolicy {
+  final DateTime started;
+  DateTime? lastShown;
+  int completions = 0, shown = 0;
+  CompletionAdPolicy(this.started);
+  bool eligible(DateTime now) =>
+      completions >= 3 &&
+      shown < 5 &&
+      now.difference(started) >= const Duration(minutes: 2) &&
+      (lastShown == null ||
+          now.difference(lastShown!) >= const Duration(minutes: 3));
+  void didShow(DateTime now) {
+    lastShown = now;
+    completions = 0;
+    shown++;
+  }
+}
+
+final transactionAds = CompletionAds();
+
+class CompletionAds with WidgetsBindingObserver {
+  final CompletionAdPolicy policy;
+  final GoogleAdsService service;
+  CompletionAds({CompletionAdPolicy? policy, GoogleAdsService? service})
+    : policy = policy ?? CompletionAdPolicy(DateTime.now()),
+      service = service ?? _googleAdsService;
+  InterstitialAd? _ad;
+  DateTime? _loadedAt;
+  bool _started = false, _loading = false, _showing = false;
+  int _generation = 0;
+  Timer? _retry;
+  int _retrySeconds = 30;
+
+  bool get hasPreparedAd =>
+      _ad != null &&
+      _loadedAt != null &&
+      DateTime.now().difference(_loadedAt!) < const Duration(minutes: 55);
+
+  void start() {
+    if (!liveAdsEnabled || _started) return;
+    _started = true;
+    WidgetsBinding.instance.addObserver(this);
+    _adPrivacyOpen.addListener(_privacyChanged);
+    unawaited(_prepare());
+  }
+
+  bool get _foreground =>
+      WidgetsBinding.instance.lifecycleState == null ||
+      WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
+
+  void _privacyChanged() {
+    _generation++;
+    _retry?.cancel();
+    _ad?.dispose();
+    _ad = null;
+    _loading = false;
+    if (!_adPrivacyOpen.value) unawaited(_prepare());
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_prepare());
+    } else {
+      _retry?.cancel();
+    }
+  }
+
+  void _scheduleRetry() {
+    if (!_started || !_foreground || _adPrivacyOpen.value) return;
+    _retry?.cancel();
+    _retry = Timer(
+      Duration(seconds: _retrySeconds),
+      () => unawaited(_prepare()),
+    );
+    _retrySeconds = (_retrySeconds * 2).clamp(30, 300);
+  }
+
+  Future<void> _prepare() async {
+    if (!_started ||
+        policy.shown >= 5 ||
+        !_foreground ||
+        _adPrivacyOpen.value ||
+        _loading ||
+        _showing) {
+      return;
+    }
+    if (_ad != null &&
+        _loadedAt != null &&
+        DateTime.now().difference(_loadedAt!) < const Duration(minutes: 55)) {
+      return;
+    }
+    _ad?.dispose();
+    _ad = null;
+    _loading = true;
+    final generation = _generation;
+    try {
+      await service.initialize();
+      if (generation != _generation) return;
+      if (!_foreground ||
+          _adPrivacyOpen.value ||
+          !await ConsentInformation.instance.canRequestAds()) {
+        _loading = false;
+        return;
+      }
+      await InterstitialAd.load(
+        adUnitId: const String.fromEnvironment(
+          'ADMOB_INTERSTITIAL_AD_UNIT_ID',
+          defaultValue: 'ca-app-pub-3940256099942544/1033173712',
+        ),
+        request: const AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+          onAdLoaded: (ad) {
+            if (generation != _generation || _adPrivacyOpen.value) {
+              ad.dispose();
+              return;
+            }
+            _loading = false;
+            _ad = ad;
+            _loadedAt = DateTime.now();
+            _retrySeconds = 30;
+          },
+          onAdFailedToLoad: (error) {
+            if (generation != _generation) return;
+            _loading = false;
+            debugPrint('AdMob completion ad unavailable: $error');
+            _scheduleRetry();
+          },
+        ),
+      );
+    } catch (error) {
+      if (generation != _generation) return;
+      _loading = false;
+      debugPrint('AdMob completion preload failed: $error');
+      _scheduleRetry();
+    }
+  }
+
+  Future<void> completed() async {
+    if (!liveAdsEnabled || _showing) return;
+    policy.completions++;
+    final now = DateTime.now();
+    if (!policy.eligible(now) ||
+        !_foreground ||
+        _adPrivacyOpen.value ||
+        _ad == null) {
+      unawaited(_prepare());
+      return;
+    }
+    if (_loadedAt == null ||
+        now.difference(_loadedAt!) >= const Duration(minutes: 55)) {
+      unawaited(_prepare());
+      return;
+    }
+    _showing = true;
+    final generation = _generation;
+    try {
+      if (!await ConsentInformation.instance.canRequestAds() ||
+          generation != _generation ||
+          !_foreground ||
+          _adPrivacyOpen.value) {
+        _showing = false;
+        return;
+      }
+      final ad = _ad;
+      if (ad == null) {
+        _showing = false;
+        return;
+      }
+      _ad = null;
+      final done = Completer<void>();
+      void finish(InterstitialAd ad) {
+        ad.dispose();
+        _showing = false;
+        if (!done.isCompleted) done.complete();
+        unawaited(_prepare());
+      }
+
+      ad.fullScreenContentCallback = FullScreenContentCallback(
+        onAdShowedFullScreenContent: (_) => policy.didShow(DateTime.now()),
+        onAdDismissedFullScreenContent: finish,
+        onAdFailedToShowFullScreenContent: (ad, error) => finish(ad),
+      );
+      try {
+        await ad.show();
+      } catch (_) {
+        finish(ad);
+      }
+      await done.future;
+    } catch (error) {
+      _showing = false;
+      debugPrint('AdMob completion ad skipped: $error');
+    }
+  }
+
+  void dispose() {
+    _started = false;
+    _loading = false;
+    _generation++;
+    _retry?.cancel();
+    _ad?.dispose();
+    _ad = null;
+    WidgetsBinding.instance.removeObserver(this);
+    _adPrivacyOpen.removeListener(_privacyChanged);
+  }
+}

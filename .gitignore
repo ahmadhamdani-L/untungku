@@ -55,3 +55,6 @@ app.*.map.json
 android/key.properties
 config/production.json
 *.log
+
+# Local code graph cache (not release source)
+.codegraph/

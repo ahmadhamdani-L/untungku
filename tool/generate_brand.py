@@ -19,15 +19,6 @@ res=root/'android/app/src/main/res';(res/'mipmap-anydpi-v26').mkdir(exist_ok=Tru
 (res/'mipmap-anydpi-v26/ic_launcher.xml').write_text('''<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android"><background android:drawable="@color/brand_green"/><foreground android:drawable="@drawable/ic_launcher_foreground"/></adaptive-icon>''')
 for name in ['drawable/launch_background.xml','drawable-v21/launch_background.xml']:
  (res/name).write_text('''<layer-list xmlns:android="http://schemas.android.com/apk/res/android"><item android:drawable="@color/brand_green"/><item android:gravity="center" android:drawable="@drawable/ic_launcher_foreground"/></layer-list>''')
-from PIL import ImageFont
-canvas=Image.new('RGB',(1024,500),'#07583F');draw=ImageDraw.Draw(canvas)
-for x,y,r in [(930,60,170),(880,460,200)]:
- draw.ellipse((x-r,y-r,x+r,y+r),fill='#0B6549')
-canvas.paste(icon(160),(64,70))
-font='/System/Library/Fonts/Supplemental/Arial Bold.ttf'
-regular='/System/Library/Fonts/Supplemental/Arial.ttf'
-if Path(font).exists():
- draw.text((252,100),'UntungKu Pro',font=ImageFont.truetype(font,64),fill='white')
- draw.text((68,290),'Kelola usaha. Kenali untung.',font=ImageFont.truetype(font,48),fill='#D9FF85')
- draw.text((70,368),'Produk • Stok • Penjualan • Laba',font=ImageFont.truetype(regular,30),fill='#D0EADF')
-canvas.save(root/'assets/branding/feature-graphic-1024x500.png')
+# Keep the store graphic synchronized with the current screenshot-based design.
+import runpy
+runpy.run_path(str(root/'tool/generate_store_graphic.py'), run_name='__main__')

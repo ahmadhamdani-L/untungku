@@ -1,1 +1,1 @@
-Catat penjualan, kelola stok, dan hitung laba usaha secara offline.
+Catat penjualan, pantau stok dan piutang, hitung laba. Offline tanpa akun.

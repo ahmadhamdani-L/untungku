@@ -1,6 +1,6 @@
 # UntungKu Pro
 
-Aplikasi Android offline berbahasa Indonesia untuk UMKM: produk, stok, penjualan banyak barang, pengeluaran, kalkulator laba, dashboard, CSV, dan backup JSON. Tidak membutuhkan login atau backend. Data produksi awal kosong.
+Aplikasi Android offline berbahasa Indonesia untuk UMKM: produk, stok, penjualan banyak barang, pengeluaran, kalkulator laba, dashboard dengan grafik tren, piutang pelanggan dan pelunasan bertahap, CSV, dan backup JSON. Tidak membutuhkan login atau backend. Data produksi awal kosong.
 
 Hasil pengujian dan batas verifikasi: [docs/VERIFICATION.md](docs/VERIFICATION.md). Screenshot aplikasi: [galeri listing](docs/store-screenshots/README.md).
 
@@ -55,7 +55,7 @@ Jalankan **Signed Android AAB**, centang konfirmasi. Pilih profil `offline`, `go
 
 `.env.example` hanya dokumentasi, **tidak otomatis dimuat Flutter**. Konfigurasi Dart menggunakan `--dart-define` atau `--dart-define-from-file`. Default `ADMOB_ENABLED=false`, `ADMOB_USE_MOCK=true`; startup tidak menginisialisasi Google SDK. `MockAdsService` menghasilkan loading/loaded/rewarded/dismissed atau failed secara deterministik tanpa koneksi iklan.
 
-Gradle menerima `ADMOB_ANDROID_APP_ID` dari environment proses build untuk placeholder Android manifest. Default adalah ID aplikasi contoh resmi Google. Environment host tidak otomatis menjadi nilai Dart. Adapter banner/interstitial/rewarded memakai ID test resmi secara default; banner otomatis berada di atas navigasi utama, dan interstitial/rewarded tidak dipasang pada alur transaksi. Adapter UMP meminta persetujuan sebelum SDK aktif dan menyediakan pilihan privasi. Integrasi iklan nyata belum diverifikasi pada perangkat. Profil owner sekarang tersedia atas permintaan pemilik; penggunaannya memerlukan konfirmasi eksplisit pada workflow. Live serving dan pesan consent akun pemilik tetap perlu verifikasi sebelum publikasi. Semua fitur bisnis tetap tersedia tanpa iklan.
+Gradle menerima `ADMOB_ANDROID_APP_ID` dari environment proses build untuk placeholder Android manifest. Default adalah ID aplikasi contoh resmi Google. Environment host tidak otomatis menjadi nilai Dart. Adapter banner/interstitial/rewarded memakai ID test resmi secara default; banner otomatis berada di atas navigasi utama, dan interstitial siap muat dapat tampil pada konfirmasi selesai setelah penjualan baru, pengeluaran baru, atau pelunasan tersimpan. Rewarded belum memiliki penempatan UI. Adapter UMP meminta persetujuan sebelum SDK aktif dan menyediakan pilihan privasi. Integrasi iklan nyata belum diverifikasi pada perangkat. Profil owner sekarang tersedia atas permintaan pemilik; penggunaannya memerlukan konfirmasi eksplisit pada workflow. Live serving dan pesan consent akun pemilik tetap perlu verifikasi sebelum publikasi. Semua fitur bisnis tetap tersedia tanpa iklan.
 
 ## Branch dan verifikasi
 
@@ -73,7 +73,7 @@ Mode test Google (memerlukan internet, bukan mode mock):
 ADMOB_ANDROID_APP_ID='ca-app-pub-3940256099942544~3347511713' flutter run --dart-define-from-file=config/google-test.json
 ```
 
-Banner hanya dimuat setelah persetujuan memungkinkan permintaan iklan. Banner test dimuat otomatis di layar utama. Kegagalan iklan tidak menghalangi pencatatan bisnis. Tidak ada penempatan interstitial/rewarded otomatis pada tombol transaksi. Tidak ada klaim pendapatan dari iklan mock/test.
+Banner hanya dimuat setelah persetujuan memungkinkan permintaan iklan. Banner test dimuat otomatis di layar utama. Kegagalan iklan tidak menghalangi pencatatan bisnis. Interstitial tampil hanya pada konfirmasi selesai: minimal 3 pencatatan berhasil, masa awal 2 menit, jeda 3 menit, maksimal 5 per sesi. Iklan yang belum siap dilewati; tidak ada tampilan terlambat saat sedang mengisi formulir. Tidak ada klaim pendapatan dari iklan mock/test.
 
 Kebijakan stok: default menolak penjualan jika stok tidak cukup. Pengaturan **Izinkan stok minus** memerlukan konfirmasi dan mencatat unit yang belum tersedia sebagai stok negatif. Penuhi stok tersebut sebelum menonaktifkan kebijakan ini. Backup menyimpan kebijakan dan memvalidasi saldo ledger.
 
@@ -86,3 +86,21 @@ Kebijakan privasi publik: https://ddd-dream-develop-digital.vercel.app/untungku-
 Panduan semua urutan Dasbor Play Console dan teks listing siap salin: [docs/PLAY_CONSOLE_SETUP_ID.md](docs/PLAY_CONSOLE_SETUP_ID.md).
 
 Perbaikan pemuatan banner versi 1.0.1 dan kebutuhan rilis dari Windows: [docs/ADS_FIX_RELEASE.md](docs/ADS_FIX_RELEASE.md).
+
+## Pembaruan 1.1.0
+
+Dashboard kini menyertakan grafik pendapatan, akses cepat pencatatan, total piutang semua periode, dan penerimaan penjualan pada periode terpilih. Form produk dikelompokkan; biaya penjualan dan kalkulator dapat dibuka sesuai kebutuhan. Detail penjualan memakai halaman tersendiri.
+
+Penjualan tempo menyimpan nama pelanggan, jatuh tempo opsional, pembayaran awal, dan riwayat pelunasan. Pelunasan tidak mengubah stok atau pendapatan. Transaksi produksi lama tanpa metadata piutang tetap dianggap lunas. Informasi tambahan tersimpan dalam payload JSON pada tabel yang sudah ada, sehingga schema SQLite tetap versi 1 tanpa perubahan struktur. Backup baru versi 2 menyertakan pembayaran; aplikasi ini menerima backup versi 1 dan 2. Aplikasi lama menolak backup versi 2. Pengembalian dana setelah pembatalan dilakukan di luar aplikasi; riwayat pembayaran dipertahankan.
+
+Rincian penempatan iklan dan hasil validasi pembaruan: [docs/UPDATE_1_1_0.md](docs/UPDATE_1_1_0.md).
+
+
+## Implementasi v2 lokal
+
+Fitur modular v2 mempertahankan Flutter/Riverpod/Drift dan identitas Android. Modul pelanggan, pemasok/pembelian, kas/rekening, opname/retur, POS/barcode manual, struk PDF/gambar, impor CSV, insight offline, PIN dan backup terenkripsi tersedia dalam workspace. Printer memakai Bluetooth Classic SPP/ESC-POS teks; kompatibilitas kamera dan printer fisik masih perlu diuji. PIN tidak mengenkripsi database. Lihat [checkpoint](PROGRESS.md), [tracker](TASKS.md) dan [desain keamanan](docs/enhancement/SECURITY_DESIGN.md). Artefak signed lokal bukan izin publikasi; versi rilis berikutnya belum ditetapkan tanpa konfirmasi riwayat Play.
+
+
+## Rilis 2.0.0
+
+Pada 6 November 2026, pemilik mengizinkan push/build/upload produksi. Sumber sekarang 2.0.0+6 setelah kode 6 dikonfirmasi belum digunakan di Play. Status pengiriman dan batasan perangkat dicatat di [laporan produksi](docs/PLAY_RELEASE_2_0_0.md). Catatan validasi lokal sebelumnya tetap disimpan sebagai riwayat.

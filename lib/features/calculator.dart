@@ -56,35 +56,6 @@ class _CalculatorState extends State<CalculatorPage> {
           'Rencanakan untung',
           'Simulasi harga dengan biaya usaha Anda.',
         ),
-        const Text(
-          'Persentase biaya dihitung dari penjualan setelah diskon. Semua biaya tetap dan diskon berlaku per transaksi.',
-        ),
-        const SizedBox(height: 20),
-        for (final i in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-          Padding(
-            padding: const EdgeInsets.only(bottom: 14),
-            child: TextField(
-              controller: controllers[i],
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              decoration: InputDecoration(
-                labelText: [
-                  'Harga jual/unit (Rp)',
-                  'Modal/unit (Rp)',
-                  'Kemasan/unit (Rp)',
-                  'Biaya tambahan/unit (Rp)',
-                  'Jumlah unit',
-                  'Diskon total (Rp)',
-                  'Biaya tetap total (Rp)',
-                  'Biaya marketplace (%)',
-                  'Target laba total (Rp)',
-                  'Target margin (%)',
-                ][i],
-              ),
-              onChanged: (_) => setState(() {}),
-            ),
-          ),
         if (error != null)
           Text(error, style: TextStyle(color: Theme.of(c).colorScheme.error)),
         if (r != null)
@@ -124,6 +95,66 @@ class _CalculatorState extends State<CalculatorPage> {
               ),
             ),
           ),
+        const SizedBox(height: 20),
+        const Text(
+          'Persentase biaya dihitung dari penjualan setelah diskon. Semua biaya tetap dan diskon berlaku per transaksi.',
+        ),
+        const SizedBox(height: 20),
+        for (final i in [0, 1, 4])
+          Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: TextField(
+              controller: controllers[i],
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              decoration: InputDecoration(
+                labelText: [
+                  'Harga jual/unit (Rp)',
+                  'Modal/unit (Rp)',
+                  'Kemasan/unit (Rp)',
+                  'Biaya tambahan/unit (Rp)',
+                  'Jumlah unit',
+                  'Diskon total (Rp)',
+                  'Biaya tetap total (Rp)',
+                  'Biaya marketplace (%)',
+                  'Target laba total (Rp)',
+                  'Target margin (%)',
+                ][i],
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+          ),
+
+        ExpansionTile(
+          tilePadding: EdgeInsets.zero,
+          title: const Text('Biaya tambahan & target laba'),
+          subtitle: const Text('Kemasan, diskon, marketplace, dan target'),
+          children: [
+            for (final i in [2, 3, 5, 6, 7, 8, 9])
+              Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: TextField(
+                  controller: controllers[i],
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: InputDecoration(
+                    labelText: {
+                      2: 'Kemasan/unit (Rp)',
+                      3: 'Biaya tambahan/unit (Rp)',
+                      5: 'Diskon total (Rp)',
+                      6: 'Biaya tetap total (Rp)',
+                      7: 'Biaya marketplace (%)',
+                      8: 'Target laba total (Rp)',
+                      9: 'Target margin (%)',
+                    }[i],
+                  ),
+                  onChanged: (_) => setState(() {}),
+                ),
+              ),
+          ],
+        ),
       ],
     );
   }

@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart' show compute;
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -8,13 +10,31 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../core/security/pin_controller.dart';
+import '../core/security/backup_cipher.dart';
 import '../data/store.dart';
+import '../data/database.dart' show CashMovementRow;
+import '../domain/business/entities.dart';
+import '../domain/business/cashflow.dart';
+import '../domain/business/returns.dart';
+import '../domain/business/pos_cart.dart';
+import '../domain/business/product_import.dart';
+import '../domain/business/insights.dart';
 import '../services/ads.dart';
+import '../services/reports/cashflow_pdf.dart';
+import '../services/receipts/printer.dart';
+import '../services/receipts/receipt_pdf.dart';
+import '../services/receipts/receipt_image.dart';
+import '../domain/receipt.dart';
 import 'privacy.dart';
 import '../domain/models.dart';
 import '../domain/money.dart';
+import '../domain/input_validation.dart';
+import 'shared/integer_field.dart';
 import '../domain/reporting.dart';
 
 part 'dashboard.dart';
@@ -22,6 +42,17 @@ part 'products.dart';
 part 'transactions.dart';
 part 'calculator.dart';
 part 'settings.dart';
+part 'security.dart';
+part 'receivables.dart';
+part 'insights.dart';
+part 'management.dart';
+part 'cash_reports.dart';
+part 'returns.dart';
+part 'pos.dart';
+part 'receipts.dart';
+part 'printer_settings.dart';
+part 'product_import.dart';
+part 'business_insights.dart';
 
 final storeProvider = ChangeNotifierProvider<Store>(
   (ref) => throw UnimplementedError(),
@@ -41,24 +72,72 @@ class UntungkuApp extends ConsumerWidget {
       useMaterial3: true,
       brightness: b,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFF087F5B),
+        seedColor: const Color(0xFF1565C0),
         brightness: b,
       ),
+      fontFamily: 'Roboto',
+      appBarTheme: AppBarTheme(
+        backgroundColor: b == Brightness.light
+            ? const Color(0xFFF5F7FA)
+            : const Color(0xFF101916),
+        centerTitle: false,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: b == Brightness.light
+            ? Colors.white
+            : const Color(0xFF1C2923),
+        elevation: 0,
+        height: 72,
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          minimumSize: const Size(48, 52),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size(48, 48),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      ),
       scaffoldBackgroundColor: b == Brightness.light
-          ? const Color(0xFFF6F8F7)
-          : const Color(0xFF101A16),
-      inputDecorationTheme: const InputDecorationTheme(
+          ? const Color(0xFFF5F7FA)
+          : const Color(0xFF101916),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: b == Brightness.light
+            ? Colors.white
+            : const Color(0xFF1C2923),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 18,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(14)),
         ),
       ),
       cardTheme: CardThemeData(
+        color: b == Brightness.light ? Colors.white : const Color(0xFF1C2923),
+        margin: const EdgeInsets.symmetric(vertical: 5),
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
     );
     return MaterialApp(
       title: 'UntungKu Pro',
+      builder: (context, child) {
+        final pin = ref.watch(pinProvider);
+        return pin == null
+            ? child!
+            : SecurityGate(controller: pin, child: child!);
+      },
       locale: const Locale('id', 'ID'),
       supportedLocales: const [Locale('id', 'ID'), Locale('en')],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
@@ -148,7 +227,7 @@ class Brand extends StatelessWidget {
     width: size,
     height: size,
     decoration: BoxDecoration(
-      color: const Color(0xFF087F5B),
+      color: const Color(0xFF1565C0),
       borderRadius: BorderRadius.circular(size * .28),
     ),
     child: ClipRRect(
@@ -171,6 +250,20 @@ class Home extends ConsumerStatefulWidget {
 class _HomeState extends ConsumerState<Home> {
   int index = 0;
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) transactionAds.start();
+    });
+  }
+
+  @override
+  void dispose() {
+    transactionAds.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final store = ref.watch(storeProvider);
     return Scaffold(
@@ -179,22 +272,36 @@ class _HomeState extends ConsumerState<Home> {
           children: [
             const Brand(),
             const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'UntungKu Pro',
-                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20),
-                ),
-                Text(
-                  store.settings['business']?.toString() ?? 'Usaha Saya',
-                  style: const TextStyle(fontSize: 12),
-                ),
-              ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'UntungKu Pro',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+                  ),
+                  Text(
+                    store.settings['business']?.toString() ?? 'Usaha Saya',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
         actions: [
+          IconButton(
+            tooltip: 'Piutang pelanggan',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ReceivablesPage()),
+            ),
+            icon: const Icon(Icons.account_balance_wallet_outlined),
+          ),
           IconButton(
             tooltip: 'Pengaturan & backup',
             onPressed: () => Navigator.push(
@@ -212,6 +319,7 @@ class _HomeState extends ConsumerState<Home> {
           ProductsPage(),
           TransactionsPage(),
           CalculatorPage(),
+          ManagementPage(),
         ],
       ),
       bottomNavigationBar: Column(
@@ -238,6 +346,10 @@ class _HomeState extends ConsumerState<Home> {
               NavigationDestination(
                 icon: Icon(Icons.calculate_outlined),
                 label: 'Kalkulator',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.more_horiz),
+                label: 'Lainnya',
               ),
             ],
           ),
@@ -272,7 +384,7 @@ Widget heading(BuildContext c, String title, String subtitle) => Padding(
         title,
         style: Theme.of(
           c,
-        ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
+        ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
       ),
       const SizedBox(height: 6),
       Text(subtitle, style: Theme.of(c).textTheme.bodyMedium),
@@ -327,3 +439,99 @@ Future<bool> confirm(BuildContext context, String title, String detail) async =>
       ),
     ) ??
     false;
+
+Widget balanceCard(
+  BuildContext c,
+  String label,
+  String value,
+  String detail,
+  IconData icon,
+) => Container(
+  padding: const EdgeInsets.all(24),
+  decoration: BoxDecoration(
+    gradient: const LinearGradient(
+      colors: [Color(0xFF07583F), Color(0xFF10966B)],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    ),
+    borderRadius: BorderRadius.circular(24),
+  ),
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Color(0xFFBEECD8),
+                fontSize: 11,
+                letterSpacing: 1.2,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          Icon(icon, color: const Color(0xFFBEECD8)),
+        ],
+      ),
+      const SizedBox(height: 12),
+      Text(
+        value,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w800,
+          fontSize: 30,
+        ),
+      ),
+      const SizedBox(height: 10),
+      Text(detail, style: const TextStyle(color: Colors.white, height: 1.5)),
+    ],
+  ),
+);
+
+Future<void> showSaveSuccess(BuildContext context, String message) async {
+  var busy = false;
+  await showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    builder: (d) => StatefulBuilder(
+      builder: (d, set) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+          icon: const Icon(
+            Icons.check_circle_rounded,
+            color: Color(0xFF087F5B),
+            size: 48,
+          ),
+          title: Text(message),
+          content: const Text('Data usaha Anda sudah tersimpan di perangkat.'),
+          actions: [
+            FilledButton(
+              onPressed: busy
+                  ? null
+                  : () async {
+                      set(() => busy = true);
+                      try {
+                        await transactionAds.completed();
+                      } finally {
+                        if (d.mounted) Navigator.pop(d);
+                      }
+                    },
+              child: const Text('Selesai'),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+Future<void> formDialog({
+  required BuildContext context,
+  required WidgetBuilder builder,
+}) async {
+  final route = DialogRoute<void>(context: context, builder: builder);
+  await Navigator.of(context).push(route);
+  await route.completed;
+}

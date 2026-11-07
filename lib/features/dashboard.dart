@@ -85,7 +85,7 @@ class _DashboardState extends ConsumerState<Dashboard> {
             ),
           ],
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
@@ -126,7 +126,7 @@ class _DashboardState extends ConsumerState<Dashboard> {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFF07583F), Color(0xFF10966B)],
+              colors: [Color(0xFF0043B8), Color(0xFF008BFF)],
             ),
             borderRadius: BorderRadius.circular(24),
           ),
@@ -136,7 +136,7 @@ class _DashboardState extends ConsumerState<Dashboard> {
               const Text(
                 'PENDAPATAN TERCATAT',
                 style: TextStyle(
-                  color: Color(0xFFBEECD8),
+                  color: Color(0xFFD6EBFF),
                   letterSpacing: 1.5,
                   fontSize: 12,
                 ),
@@ -180,7 +180,7 @@ class _DashboardState extends ConsumerState<Dashboard> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(metric.$3, color: const Color(0xFF087F5B)),
+                          Icon(metric.$3, color: const Color(0xFF0066E6)),
                           const SizedBox(height: 14),
                           Text(metric.$1),
                           const SizedBox(height: 6),
@@ -204,6 +204,41 @@ class _DashboardState extends ConsumerState<Dashboard> {
           ),
         ),
         const SizedBox(height: 16),
+        Text(
+          'Aksi cepat',
+          style: Theme.of(
+            c,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            OutlinedButton.icon(
+              onPressed: () => Navigator.push(
+                c,
+                MaterialPageRoute(builder: (_) => const PosPage()),
+              ),
+              icon: const Icon(Icons.shopping_cart_outlined),
+              label: const Text('Kasir cepat'),
+            ),
+            OutlinedButton.icon(
+              onPressed: () => Navigator.push(
+                c,
+                MaterialPageRoute(builder: (_) => const ProductForm()),
+              ),
+              icon: const Icon(Icons.add_box_outlined),
+              label: const Text('Tambah produk'),
+            ),
+            OutlinedButton.icon(
+              onPressed: () => expenseDialog(c, store),
+              icon: const Icon(Icons.payments_outlined),
+              label: const Text('Pengeluaran'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
         Card(
           child: ListTile(
             contentPadding: const EdgeInsets.all(16),

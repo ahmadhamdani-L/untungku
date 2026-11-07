@@ -106,7 +106,7 @@ void main() {
       await tester.pump(const Duration(seconds: 31));
       await tester.pumpAndSettle();
       expect(find.text('Data rahasia'), findsNothing);
-      expect(find.text('Buka UntungKu Pro'), findsOneWidget);
+      expect(find.text('Buka LabaRapi'), findsOneWidget);
       await tester.enterText(find.widgetWithText(TextField, 'PIN'), '1234');
       await tester.tap(find.text('Buka'));
       for (var i = 0; i < 100 && controller.locked; i++) {

@@ -1,1 +1,1 @@
-Catat penjualan, pantau stok dan piutang, hitung laba. Offline tanpa akun.
+Kasir, stok, kas, piutang, dan laporan usaha UMKM. Bisa dipakai offline.

@@ -1,29 +1,35 @@
-UntungKu Pro membantu pemilik UMKM mencatat kegiatan usaha, memantau stok, dan memahami perhitungan laba dari satu aplikasi berbahasa Indonesia.
+Bikin usaha lebih rapi, laba lebih pasti bersama LabaRapi.
 
-Pencatatan usaha dapat digunakan offline tanpa membuat akun. Data usaha tersimpan di perangkat Anda.
+LabaRapi, sebelumnya UntungKu Pro, membantu pemilik warung, toko, kedai, dan usaha kecil mencatat kegiatan usaha dalam satu aplikasi. Catat penjualan, pantau stok, kelola uang usaha, dan lihat estimasi laba tanpa harus membuat akun.
 
-FITUR UTAMA
-• Kelola produk, SKU, kategori, harga, dan modal.
-• Pantau stok serta catat koreksi stok dengan alasan.
-• Catat penjualan dengan beberapa produk dalam satu transaksi.
-• Simpan metode pembayaran, diskon, biaya, dan catatan transaksi.
-• Revisi atau batalkan penjualan dengan penyesuaian stok.
-• Catat dan kelola pengeluaran usaha.
-• Catat piutang pelanggan, pembayaran bertahap, dan jatuh tempo.
-• Pantau sisa tagihan dan riwayat pelunasan tanpa menghitung penjualan dua kali.
-• Lihat ringkasan pendapatan, estimasi laba, grafik tren pendapatan, produk terlaris, dan stok menipis berdasarkan data yang dicatat.
-• Gunakan kalkulator untuk simulasi harga jual, margin, markup, dan target laba.
-• Ekspor transaksi ke CSV dan simpan backup JSON.
-• Pulihkan backup melalui konfirmasi dalam aplikasi.
-• Pilih tema terang, gelap, atau mengikuti perangkat.
+KASIR CEPAT DAN PENJUALAN
+Cari produk, gunakan favorit, masukkan barcode, dan susun keranjang belanja. Catat pembayaran tunai atau penjualan kredit, lalu buka kembali riwayat transaksi saat dibutuhkan.
 
-DATA DAN BACKUP
-Lakukan backup secara berkala dan simpan di tempat yang aman. Menghapus data aplikasi, menghapus instalasi, atau kehilangan perangkat dapat menghilangkan catatan lokal. Salinan backup yang diekspor berada di lokasi yang Anda pilih.
+STOK DAN PRODUK
+Kelola harga, modal, kategori, dan stok produk. Lihat produk yang perlu restok, catat penerimaan barang dari pemasok, lakukan stock opname, dan tangani retur dengan riwayat pencatatan yang tetap tersimpan. Impor produk dari CSV melalui pratinjau sebelum disimpan.
 
-IKLAN
-Versi ini menyertakan banner Google AdMob di atas navigasi utama dan iklan layar penuh pada konfirmasi selesai setelah pencatatan penjualan, pengeluaran, atau pelunasan berhasil. Penayangan iklan layar penuh dibatasi frekuensinya. Iklan membutuhkan koneksi internet dan mengikuti pemeriksaan pilihan privasi. Fitur pencatatan usaha tetap dapat digunakan ketika iklan tidak tersedia.
+KAS DAN REKENING USAHA
+Pisahkan pencatatan akun kas dan rekening. Pantau uang masuk, uang keluar, transfer antar akun, pengeluaran operasional, dan laporan arus kas.
 
-Perhitungan laba merupakan estimasi berdasarkan data dan biaya yang Anda masukkan. Periksa kembali catatan agar sesuai dengan kegiatan usaha Anda.
+PIUTANG PELANGGAN DAN UTANG PEMASOK
+Simpan kontak pelanggan dan pemasok. Pantau sisa tagihan, jatuh tempo, serta pembayaran bertahap agar penjualan kredit dan pembelian lebih mudah ditelusuri.
+
+LAPORAN YANG MUDAH DIPAHAMI
+Lihat ringkasan pendapatan, estimasi laba, tren penjualan, produk terlaris, dan kondisi stok. Asisten usaha offline merangkum informasi restok, margin, dan tagihan berdasarkan catatan Anda. Kalkulator harga membantu merencanakan harga jual dan margin.
+
+STRUK DIGITAL
+Buat struk PDF atau gambar dari transaksi, tambahkan identitas usaha, dan bagikan melalui aplikasi yang tersedia di perangkat.
+
+BISA DIPAKAI OFFLINE
+Pencatatan utama tetap berjalan tanpa internet. Data usaha tersimpan lokal pada perangkat, bukan disinkronkan otomatis ke cloud. Iklan dan beberapa layanan perangkat memerlukan koneksi atau izin yang sesuai.
+
+PIN DAN BACKUP
+Lindungi akses aplikasi dengan PIN dan buat backup terenkripsi dengan kata sandi. Simpan salinan backup di lokasi yang aman. Menghapus aplikasi atau kehilangan perangkat dapat menghilangkan data lokal jika Anda belum membuat backup.
+
+NYAMAN UNTUK KEGIATAN SEHARI-HARI
+Tampilan biru-putih yang ringkas, pilihan mode gelap, dan navigasi Beranda, Transaksi, Laporan, Produk, serta Lainnya membantu Anda menemukan kebutuhan usaha dengan cepat.
+
+LabaRapi menampilkan estimasi dari catatan yang Anda masukkan, bukan pengganti laporan akuntansi atau perpajakan profesional. Hasil mengikuti kelengkapan dan ketepatan data usaha Anda.
 
 Dikembangkan oleh Lelouch D — PT DDD DREAM DEVELOP DIGITAL.
 Dukungan: hmdhmdndani@gmail.com

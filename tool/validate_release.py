@@ -18,7 +18,8 @@ if profile not in allowed:
 config = json.loads(profile.read_text())
 if config.get('ADMOB_ENABLED') and not config.get('ADMOB_USE_MOCK', True):
     for key in ['ADMOB_BANNER_AD_UNIT_ID', 'ADMOB_INTERSTITIAL_AD_UNIT_ID',
-                'ADMOB_REWARDED_AD_UNIT_ID']:
+                'ADMOB_REWARDED_AD_UNIT_ID', 'ADMOB_NATIVE_AD_UNIT_ID',
+                'ADMOB_APP_OPEN_AD_UNIT_ID']:
         if not re.fullmatch(r'ca-app-pub-\d{16}/\d{10}', config.get(key, '')):
             sys.exit('Invalid ad unit: ' + key)
     if profile.name == 'admob-release.json':

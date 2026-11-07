@@ -139,3 +139,24 @@ Every task inherits its feature acceptance criteria, dependencies, file scope an
 | SEC | 13: derived PIN, secure storage, AEAD, legacy recovery | lib/core/security, lib/core/backup | wrong PIN/password, tamper, atomic restore | all entity modules |
 | QA | 15–17: existing features, light/dark/tablet/accessibility | lib/features, test, integration_test | full suite, device and actual benchmarks | all feature phases |
 | REL | 18, 23: verified local artifacts; no remote publication | pubspec, android, tool, docs | format/analyze/tests/build/identity | QA |
+
+### LABARAPI — USER-REQUESTED DESIGN REFRESH (2026-11-06)
+- [x] Blue/white reference styling, coordinated dark theme, LabaRapi display identity and vector app mark implemented; package and data model retained.
+- [x] Report navigation and calculator access retained; cashier/product/expense quick actions added. Focused navigation test passed.
+- [x] User ad IDs compared with unchanged production profile; banner moved away from bottom navigation to isolated overview-only top placement. Existing consent/completion/caps retained; other formats not force-enabled. See LABARAPI_DESIGN.md.
+- [x] Formatter 94 files unchanged; analyzer clean; full regression 129 passed/4 offline skips; focused ads/navigation/accessibility 7 passed/4 offline skips; separate live-consent adapter 4 passed. Logs in build/labarapi-preview/logs.
+- [x] Android business flow 1 passed; screenshot navigation 1 passed and eight captures created from isolated example data. Existing physical-device acceptance remains unchecked.
+
+### ADS-ALL — ENABLE ALL FIVE FORMATS (2026-11-06)
+- [x] Native report template, optional rewarded session quiet time, and safe warm-return app-open implemented with production IDs retained. Shared fullscreen spacing/exclusion, UMP/privacy invalidation, disposal/expiry and quiet-time suppression added. See ALL_AD_FORMATS.md.
+- [x] Full regression 131 passed/10 offline adapter skips; separate existing/new live adapter tests 11 passed/1 offline-only skip. Reward callback/dismissal, expiry, consent, no-fill/backoff, disposal, shared spacing and app-open cap verified.
+- [x] Final formatter 96 files unchanged; analyzer clean. Android Google sample-unit suite 5 passed: banner/interstitial/rewarded/app-open load and native load/render. Evidence: build/labarapi-all-ads/logs.
+
+
+### LABARAPI-REL — PRODUCTION AND LISTING (2026-11-07)
+- [x] Verify active production 2.1.0+7 and retain package, upload key and production profile; no duplicate version upload.
+- [x] Rebuild signed APK and verify APK/AAB signatures, SDK/identity/version/all five IDs and absent test plugin; equal arm64 runtime/privacy/icon bytes.
+- [x] Capture updated phone/tablet UI; replace default tablet assets and refresh all existing custom-listing text/graphics while preserving targeting.
+- [x] Submit nine listing changes for review; verify submitted status and automatic publication after approval. Console evidence in docs/play-release-labarapi-production.json.
+- [ ] Google approval/propagation of the nine listing updates — external pending; production app binary is already active.
+- [ ] Preserve/push the source checkpoint and finalize evidence.

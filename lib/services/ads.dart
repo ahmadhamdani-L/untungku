@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
+part 'ad_placements.dart';
+
 enum AdState { idle, loading, loaded, dismissed, failed, rewarded }
 
 abstract interface class AdsService {
@@ -231,7 +233,7 @@ Future<void> refreshAdPrivacyRequirement() async {
 AdsService createAdsService() =>
     liveAdsEnabled ? _googleAdsService : MockAdsService();
 
-/// One persistent banner above navigation; privacy choices live in settings.
+/// Isolated banner at the top of the overview, away from navigation and forms.
 class OptionalAdBanner extends StatefulWidget {
   const OptionalAdBanner({super.key});
   @override
@@ -252,6 +254,7 @@ class _OptionalAdBannerState extends State<OptionalAdBanner>
     if (liveAdsEnabled) {
       WidgetsBinding.instance.addObserver(this);
       _adPrivacyOpen.addListener(_privacyChanged);
+      adSession.addListener(_privacyChanged);
       // Show any required consent form after the first screen has rendered.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) unawaited(load());
@@ -267,7 +270,7 @@ class _OptionalAdBannerState extends State<OptionalAdBanner>
       banner = null;
       _loading = false;
     });
-    if (!_adPrivacyOpen.value) unawaited(load());
+    if (!_adPrivacyOpen.value && !adSession.quiet) unawaited(load());
   }
 
   @override
@@ -280,7 +283,7 @@ class _OptionalAdBannerState extends State<OptionalAdBanner>
   }
 
   Future<void> load() async {
-    if (_loading || !mounted || _adPrivacyOpen.value) return;
+    if (_loading || !mounted || _adPrivacyOpen.value || adSession.quiet) return;
     _retry?.cancel();
     _loading = true;
     final generation = _generation;
@@ -320,31 +323,47 @@ class _OptionalAdBannerState extends State<OptionalAdBanner>
     _retry?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     _adPrivacyOpen.removeListener(_privacyChanged);
+    adSession.removeListener(_privacyChanged);
     banner?.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => banner == null
-      ? const SizedBox.shrink()
-      : SafeArea(
-          top: false,
-          bottom: false,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('Iklan'),
-                SizedBox(
-                  width: banner!.size.width.toDouble(),
-                  height: banner!.size.height.toDouble(),
-                  child: AdWidget(ad: banner!),
+  Widget build(BuildContext context) {
+    // Hide even the underlying banner while a form or modal covers the overview.
+    if (adSession.quiet || ModalRoute.isCurrentOf(context) == false) {
+      return const SizedBox.shrink();
+    }
+    return banner == null
+        ? (liveAdsEnabled
+              ? const SizedBox(height: 106)
+              : const SizedBox.shrink())
+        : SafeArea(
+            top: false,
+            bottom: false,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                border: Border(
+                  bottom: BorderSide(color: Theme.of(context).dividerColor),
                 ),
-              ],
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Iklan', style: TextStyle(fontSize: 12)),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: banner!.size.width.toDouble(),
+                    height: banner!.size.height.toDouble(),
+                    child: AdWidget(ad: banner!),
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
+          );
+  }
 }
 
 class AdPrivacyOptions extends StatelessWidget {
@@ -437,6 +456,7 @@ class CompletionAds with WidgetsBindingObserver {
     _started = true;
     WidgetsBinding.instance.addObserver(this);
     _adPrivacyOpen.addListener(_privacyChanged);
+    adSession.addListener(_privacyChanged);
     unawaited(_prepare());
   }
 
@@ -450,7 +470,7 @@ class CompletionAds with WidgetsBindingObserver {
     _ad?.dispose();
     _ad = null;
     _loading = false;
-    if (!_adPrivacyOpen.value) unawaited(_prepare());
+    if (!_adPrivacyOpen.value && !adSession.quiet) unawaited(_prepare());
   }
 
   @override
@@ -474,6 +494,7 @@ class CompletionAds with WidgetsBindingObserver {
 
   Future<void> _prepare() async {
     if (!_started ||
+        adSession.quiet ||
         policy.shown >= 5 ||
         !_foreground ||
         _adPrivacyOpen.value ||
@@ -533,7 +554,7 @@ class CompletionAds with WidgetsBindingObserver {
   }
 
   Future<void> completed() async {
-    if (!liveAdsEnabled || _showing) return;
+    if (!liveAdsEnabled || _showing || !adSession.automaticAllowed) return;
     policy.completions++;
     final now = DateTime.now();
     if (!policy.eligible(now) ||
@@ -563,17 +584,25 @@ class CompletionAds with WidgetsBindingObserver {
         _showing = false;
         return;
       }
+      if (!adSession.acquire()) {
+        _showing = false;
+        return;
+      }
       _ad = null;
       final done = Completer<void>();
       void finish(InterstitialAd ad) {
         ad.dispose();
         _showing = false;
+        adSession.release();
         if (!done.isCompleted) done.complete();
         unawaited(_prepare());
       }
 
       ad.fullScreenContentCallback = FullScreenContentCallback(
-        onAdShowedFullScreenContent: (_) => policy.didShow(DateTime.now()),
+        onAdShowedFullScreenContent: (_) {
+          policy.didShow(DateTime.now());
+          adSession.shown();
+        },
         onAdDismissedFullScreenContent: finish,
         onAdFailedToShowFullScreenContent: (ad, error) => finish(ad),
       );
@@ -598,5 +627,6 @@ class CompletionAds with WidgetsBindingObserver {
     _ad = null;
     WidgetsBinding.instance.removeObserver(this);
     _adPrivacyOpen.removeListener(_privacyChanged);
+    adSession.removeListener(_privacyChanged);
   }
 }

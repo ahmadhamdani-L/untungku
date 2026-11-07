@@ -47,6 +47,7 @@ class _SettingsState extends ConsumerState<SettingsPage> {
       body: PageBody(
         children: [
           heading(c, 'Sesuai cara Anda', 'Preferensi dan keamanan data usaha.'),
+          const RewardedQuietTile(),
           TextField(
             controller: name,
             decoration: const InputDecoration(labelText: 'Nama usaha'),
@@ -343,7 +344,7 @@ class _SettingsState extends ConsumerState<SettingsPage> {
           const AdPrivacyOptions(),
           const ListTile(
             leading: Icon(Icons.info_outline),
-            title: Text('UntungKu Pro 2.0.0'),
+            title: Text('LabaRapi 2.1.0'),
             subtitle: Text(
               'Estimasi laba bukan nasihat keuangan. Retur parsial: revisi transaksi. Pembatalan penuh mengembalikan stok. Stok minus ditolak secara default dan hanya diizinkan melalui pengaturan eksplisit.',
             ),

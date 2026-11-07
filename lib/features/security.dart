@@ -139,7 +139,7 @@ class _PinUnlockState extends State<_PinUnlock> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(Icons.lock_outline, size: 48),
-                  const Text('Buka UntungKu Pro'),
+                  const Text('Buka LabaRapi'),
                   TextField(
                     controller: pin,
                     obscureText: true,

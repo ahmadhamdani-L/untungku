@@ -84,7 +84,7 @@ apk_xml = run([args.build_tools / 'aapt', 'dump', 'xmltree', args.apk, 'AndroidM
 require(profile['ADMOB_ANDROID_APP_ID'] in apk_xml, 'APK AdMob application ID does not match profile')
 with zipfile.ZipFile(args.apk) as apk:
     compiled = apk.read('lib/arm64-v8a/libapp.so')
-    for key in ['ADMOB_BANNER_AD_UNIT_ID', 'ADMOB_INTERSTITIAL_AD_UNIT_ID']:
+    for key in ['ADMOB_BANNER_AD_UNIT_ID', 'ADMOB_INTERSTITIAL_AD_UNIT_ID', 'ADMOB_REWARDED_AD_UNIT_ID', 'ADMOB_NATIVE_AD_UNIT_ID', 'ADMOB_APP_OPEN_AD_UNIT_ID']:
         value = profile[key]
         require(value.encode() in compiled or value.encode('utf-16le') in compiled, 'Active ad unit does not match explicit profile: ' + key)
     for name in apk.namelist():
@@ -93,7 +93,7 @@ with zipfile.ZipFile(args.apk) as apk:
             require(b'IntegrationTestPlugin' not in apk.read(name), 'Integration-test plugin leaked into release APK')
 
 source_hash = hashlib.sha256()
-source_files = sorted([*Path('lib').rglob('*.dart'), Path('pubspec.yaml'), Path('pubspec.lock'), Path('android/app/src/main/AndroidManifest.xml'), Path('android/app/src/main/kotlin/id/untungku/untungku_pro/MainActivity.kt'), Path('android/app/build.gradle.kts'), args.profile])
+source_files = sorted([*Path('lib').rglob('*.dart'), Path('pubspec.yaml'), Path('pubspec.lock'), Path('android/app/src/main/AndroidManifest.xml'), Path('android/app/src/main/kotlin/id/untungku/untungku_pro/MainActivity.kt'), Path('android/app/build.gradle.kts'), args.profile, *Path('android/app/src/main/res').rglob('*.xml'), *Path('android/app/src/main/res').rglob('*.png'), *Path('assets/branding').glob('*.png'), Path('assets/legal/privacy-id.json')])
 for path in source_files:
     source_hash.update(str(path).encode() + b'\0' + path.read_bytes() + b'\0')
 play_confirmed = False
@@ -105,6 +105,7 @@ report = {'sourceSha256': source_hash.hexdigest(), 'package': package, 'versionN
           'minSdk': 24, 'targetSdk': 36, 'uploadCertificateMatches': True,
           'apkAndAabSignaturesVerified': True, 'productionAdmobAppIdMatchesProfile': True,
           'activeBannerInterstitialUnitsMatchProfile': True,
+          'allFiveAdUnitsMatchProfile': True,
           'bluetoothCameraOptional': True, 'secureStorageBackupDisabled': True,
           'integrationPluginAbsentFromRelease': True, 'playVersionCodeConfirmedUnused': play_confirmed,
           'releaseReady': False, 'publicationPerformed': False,
@@ -114,4 +115,4 @@ report = {'sourceSha256': source_hash.hexdigest(), 'package': package, 'versionN
 args.report.parent.mkdir(parents=True, exist_ok=True)
 args.report.write_text(json.dumps(report, indent=2) + '\n')
 print('Local APK/AAB signatures, identity, SDK, permissions and explicit AdMob app profile verified.')
-print('Release readiness remains blocked by physical hardware and unused version-code confirmation.')
+print('Hardware acceptance remains unverified; consult the release report for the actual submission status.')

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart' show compute;
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -38,6 +39,7 @@ import 'shared/integer_field.dart';
 import '../domain/reporting.dart';
 
 part 'dashboard.dart';
+part 'reports_home.dart';
 part 'products.dart';
 part 'transactions.dart';
 part 'calculator.dart';
@@ -71,15 +73,26 @@ class UntungkuApp extends ConsumerWidget {
     ThemeData theme(Brightness b) => ThemeData(
       useMaterial3: true,
       brightness: b,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFF1565C0),
-        brightness: b,
-      ),
+      colorScheme:
+          ColorScheme.fromSeed(
+            seedColor: const Color(0xFF0066E6),
+            brightness: b,
+          ).copyWith(
+            primary: b == Brightness.light
+                ? const Color(0xFF0066E6)
+                : const Color(0xFFAACFFF),
+            onPrimary: b == Brightness.light
+                ? Colors.white
+                : const Color(0xFF002F6C),
+          ),
       fontFamily: 'Roboto',
       appBarTheme: AppBarTheme(
+        systemOverlayStyle: b == Brightness.light
+            ? SystemUiOverlayStyle.dark
+            : SystemUiOverlayStyle.light,
         backgroundColor: b == Brightness.light
-            ? const Color(0xFFF5F7FA)
-            : const Color(0xFF101916),
+            ? const Color(0xFFF3F7FF)
+            : const Color(0xFF0C1628),
         centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -87,7 +100,7 @@ class UntungkuApp extends ConsumerWidget {
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: b == Brightness.light
             ? Colors.white
-            : const Color(0xFF1C2923),
+            : const Color(0xFF16243A),
         elevation: 0,
         height: 72,
       ),
@@ -108,13 +121,13 @@ class UntungkuApp extends ConsumerWidget {
         ),
       ),
       scaffoldBackgroundColor: b == Brightness.light
-          ? const Color(0xFFF5F7FA)
-          : const Color(0xFF101916),
+          ? const Color(0xFFF3F7FF)
+          : const Color(0xFF0C1628),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: b == Brightness.light
             ? Colors.white
-            : const Color(0xFF1C2923),
+            : const Color(0xFF16243A),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 18,
@@ -124,14 +137,21 @@ class UntungkuApp extends ConsumerWidget {
         ),
       ),
       cardTheme: CardThemeData(
-        color: b == Brightness.light ? Colors.white : const Color(0xFF1C2923),
+        color: b == Brightness.light ? Colors.white : const Color(0xFF16243A),
         margin: const EdgeInsets.symmetric(vertical: 5),
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: b == Brightness.light
+                ? const Color(0xFFDCE8FA)
+                : const Color(0xFF2B405E),
+          ),
+        ),
       ),
     );
     return MaterialApp(
-      title: 'UntungKu Pro',
+      title: 'LabaRapi',
       builder: (context, child) {
         final pin = ref.watch(pinProvider);
         return pin == null
@@ -227,18 +247,46 @@ class Brand extends StatelessWidget {
     width: size,
     height: size,
     decoration: BoxDecoration(
-      color: const Color(0xFF1565C0),
-      borderRadius: BorderRadius.circular(size * .28),
-    ),
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(size * .28),
-      child: Image.asset(
-        'assets/branding/untungku-icon-512.png',
-        width: size,
-        height: size,
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF00A8FF), Color(0xFF0050D8)],
       ),
+      borderRadius: BorderRadius.circular(size * .28),
     ),
+    child: CustomPaint(painter: _LabaRapiMark()),
   );
+}
+
+class _LabaRapiMark extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.scale(size.width / 108, size.height / 108);
+    final paint = Paint()..color = Colors.white;
+    for (final bar in [
+      const Rect.fromLTRB(25, 48, 38, 70),
+      const Rect.fromLTRB(45, 36, 58, 70),
+      const Rect.fromLTRB(65, 22, 78, 70),
+    ]) {
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(bar, const Radius.circular(3)),
+        paint,
+      );
+    }
+    paint
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4
+      ..strokeCap = StrokeCap.round;
+    canvas.drawPath(
+      Path()
+        ..moveTo(22, 83)
+        ..cubicTo(42, 68, 65, 89, 87, 65),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class Home extends ConsumerStatefulWidget {
@@ -247,105 +295,157 @@ class Home extends ConsumerStatefulWidget {
   ConsumerState<Home> createState() => _HomeState();
 }
 
-class _HomeState extends ConsumerState<Home> {
+class _HomeState extends ConsumerState<Home> with WidgetsBindingObserver {
+  late final PreparedPlacement openingAds;
+  DateTime? backgrounded;
+  int safeReturns = 0;
+  bool resuming = false;
+  bool get safeForOpeningAd =>
+      mounted &&
+      index == 0 &&
+      ModalRoute.isCurrentOf(context) != false &&
+      ref.read(pinProvider)?.enabled != true &&
+      MediaQuery.viewInsetsOf(context).bottom == 0;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused && !adSession.fullscreen) {
+      backgrounded = DateTime.now();
+    } else if (state == AppLifecycleState.resumed) {
+      final since = backgrounded;
+      backgrounded = null;
+      if (since == null ||
+          DateTime.now().difference(since) < const Duration(seconds: 30) ||
+          !safeForOpeningAd ||
+          resuming) {
+        return;
+      }
+      safeReturns++;
+      if (safeReturns < 3 || !openingAds.canOpen) return;
+      setState(() => resuming = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        try {
+          await openingAds.show(safe: () => safeForOpeningAd && resuming);
+        } finally {
+          if (mounted) setState(() => resuming = false);
+        }
+      });
+    }
+  }
+
   int index = 0;
   @override
   void initState() {
     super.initState();
+    openingAds = PreparedPlacement(PreparedFormat.appOpen);
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) transactionAds.start();
+      if (mounted) {
+        transactionAds.start();
+        openingAds.start();
+      }
     });
   }
 
   @override
   void dispose() {
     transactionAds.dispose();
+    openingAds.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final store = ref.watch(storeProvider);
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            const Brand(),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'UntungKu Pro',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(
+            title: Row(
+              children: [
+                const Brand(),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'LabaRapi',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 18,
+                        ),
+                      ),
+                      Text(
+                        store.settings['business']?.toString() ?? 'Usaha Saya',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ],
                   ),
-                  Text(
-                    store.settings['business']?.toString() ?? 'Usaha Saya',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                ],
+                ),
+              ],
+            ),
+            actions: [
+              IconButton(
+                tooltip: 'Piutang pelanggan',
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ReceivablesPage()),
+                ),
+                icon: const Icon(Icons.account_balance_wallet_outlined),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            tooltip: 'Piutang pelanggan',
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const ReceivablesPage()),
-            ),
-            icon: const Icon(Icons.account_balance_wallet_outlined),
+              IconButton(
+                tooltip: 'Pengaturan & backup',
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SettingsPage()),
+                ),
+                icon: const Icon(Icons.tune_rounded),
+              ),
+            ],
           ),
-          IconButton(
-            tooltip: 'Pengaturan & backup',
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const SettingsPage()),
-            ),
-            icon: const Icon(Icons.tune_rounded),
+          body: Column(
+            children: [
+              if (index == 0) const OptionalAdBanner(),
+              Expanded(
+                child: IndexedStack(
+                  index: index,
+                  children: [
+                    const Dashboard(),
+                    const TransactionsPage(),
+                    ReportsPage(active: index == 2),
+                    const ProductsPage(),
+                    const ManagementPage(),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-      body: IndexedStack(
-        index: index,
-        children: const [
-          Dashboard(),
-          ProductsPage(),
-          TransactionsPage(),
-          CalculatorPage(),
-          ManagementPage(),
-        ],
-      ),
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const OptionalAdBanner(),
-          NavigationBar(
+          bottomNavigationBar: NavigationBar(
             selectedIndex: index,
             onDestinationSelected: (v) => setState(() => index = v),
             destinations: const [
               NavigationDestination(
-                icon: Icon(Icons.grid_view_outlined),
-                selectedIcon: Icon(Icons.grid_view_rounded),
-                label: 'Ringkasan',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.inventory_2_outlined),
-                label: 'Produk',
+                icon: Icon(Icons.home_outlined),
+                selectedIcon: Icon(Icons.home_rounded),
+                label: 'Beranda',
               ),
               NavigationDestination(
                 icon: Icon(Icons.receipt_long_outlined),
                 label: 'Transaksi',
               ),
               NavigationDestination(
-                icon: Icon(Icons.calculate_outlined),
-                label: 'Kalkulator',
+                icon: Icon(Icons.bar_chart_rounded),
+                label: 'Laporan',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.inventory_2_outlined),
+                label: 'Produk',
               ),
               NavigationDestination(
                 icon: Icon(Icons.more_horiz),
@@ -353,8 +453,27 @@ class _HomeState extends ConsumerState<Home> {
               ),
             ],
           ),
-        ],
-      ),
+        ),
+        if (resuming)
+          const Positioned.fill(
+            child: Material(
+              child: SafeArea(
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Brand(size: 64),
+                      SizedBox(height: 24),
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text('Menyiapkan LabaRapi…'),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -395,7 +514,7 @@ Widget empty(String title, String detail, IconData icon) => Padding(
   padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 12),
   child: Column(
     children: [
-      Icon(icon, size: 64, color: const Color(0xFF36A17C)),
+      Icon(icon, size: 64, color: const Color(0xFF0066E6)),
       const SizedBox(height: 16),
       Text(
         title,
@@ -450,7 +569,7 @@ Widget balanceCard(
   padding: const EdgeInsets.all(24),
   decoration: BoxDecoration(
     gradient: const LinearGradient(
-      colors: [Color(0xFF07583F), Color(0xFF10966B)],
+      colors: [Color(0xFF0043B8), Color(0xFF008BFF)],
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
     ),
@@ -465,14 +584,14 @@ Widget balanceCard(
             child: Text(
               label,
               style: const TextStyle(
-                color: Color(0xFFBEECD8),
+                color: Color(0xFFD6EBFF),
                 fontSize: 11,
                 letterSpacing: 1.2,
                 fontWeight: FontWeight.w700,
               ),
             ),
           ),
-          Icon(icon, color: const Color(0xFFBEECD8)),
+          Icon(icon, color: const Color(0xFFD6EBFF)),
         ],
       ),
       const SizedBox(height: 12),

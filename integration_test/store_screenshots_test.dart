@@ -119,8 +119,22 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    if (const bool.fromEnvironment('LABARAPI_PREVIEW_ONLY')) {
+      // Allow a lossless host adb capture without changing Android surfaces.
+      debugPrint('LABARAPI_PREVIEW_READY');
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(seconds: 20)),
+      );
+      await tester.pumpWidget(const SizedBox());
+      await db.close();
+      return;
+    }
     await binding.convertFlutterSurfaceToImage();
+    // Repaint static app bars after Android switches the rendering surface.
+    await binding.reassembleApplication();
+    await tester.pumpAndSettle();
     Future<void> capture(String name) async {
+      await binding.reassembleApplication();
       await tester.pumpAndSettle();
       await binding.takeScreenshot(name);
     }
@@ -136,6 +150,13 @@ void main() {
     await capture('02-insights');
     await tester.tap(find.text('Produk'));
     await capture('03-products');
+    await tester.tap(find.text('Lainnya'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(ListTile, 'Kasir cepat'));
+    await tester.pumpAndSettle();
+    await capture('09-cashier');
+    Navigator.of(tester.element(find.byType(PosPage))).pop();
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Transaksi'));
     await capture('04-transactions');
     await tester.tap(find.byTooltip('Piutang pelanggan'));
@@ -147,7 +168,20 @@ void main() {
     await tester.pumpAndSettle();
     nav.pop();
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Kalkulator'));
+    await tester.tap(find.text('Laporan'));
+    await tester.pumpAndSettle();
+    await capture('10-reports');
+    await tester.scrollUntilVisible(
+      find.text('Kalkulator harga'),
+      200,
+      scrollable: find
+          .descendant(
+            of: find.byType(ReportsPage),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    await tester.tap(find.text('Kalkulator harga'));
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
       find.widgetWithText(TextField, 'Harga jual/unit (Rp)'),
@@ -181,6 +215,8 @@ void main() {
           .first,
     );
     await capture('07-calculator');
+    Navigator.of(tester.element(find.byType(CalculatorPage))).pop();
+    await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Pengaturan & backup'));
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(

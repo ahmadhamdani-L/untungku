@@ -1,7 +1,8 @@
-<id>
-• Tampilan baru yang lebih ringkas dengan grafik tren pendapatan.
-• Piutang pelanggan, jatuh tempo, serta pembayaran bertahap.
-• Detail penjualan dan riwayat pelunasan lebih jelas.
-• Backup dan CSV menyertakan data piutang serta pembayaran.
-• Banner dan iklan layar penuh setelah pencatatan berhasil, dengan batas frekuensi.
-</id>
+UntungKu Pro kini menjadi LabaRapi!
+• Tampilan biru-putih dan ikon baru, dengan mode gelap.
+• Navigasi Beranda, Transaksi, Laporan, Produk, dan Lainnya.
+• Aksi cepat kasir, tambah produk, dan pengeluaran.
+• Kelola penjualan, stok, kas, piutang, dan laporan offline.
+• Struk digital, impor CSV, PIN, dan backup terenkripsi.
+• Penempatan iklan diperbarui; pilihan jeda iklan 30 menit melalui iklan reward.
+Data usaha dan identitas aplikasi tetap dipertahankan.

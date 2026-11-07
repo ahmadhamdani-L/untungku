@@ -41,7 +41,7 @@ class RevenueTrend extends StatelessWidget {
                     ),
                   ),
                 ),
-                const Icon(Icons.bar_chart_rounded, color: Color(0xFF087F5B)),
+                const Icon(Icons.bar_chart_rounded, color: Color(0xFF0066E6)),
               ],
             ),
             const SizedBox(height: 4),
@@ -70,7 +70,7 @@ class RevenueTrend extends StatelessWidget {
                                 : 4 + totals[i] / maximum * 96,
                             decoration: BoxDecoration(
                               color: maximum > 0 && totals[i] == maximum
-                                  ? const Color(0xFF087F5B)
+                                  ? const Color(0xFF0066E6)
                                   : Theme.of(c).colorScheme.primaryContainer,
                               borderRadius: BorderRadius.circular(6),
                             ),

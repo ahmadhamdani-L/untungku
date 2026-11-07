@@ -54,6 +54,7 @@ void main() {
         final overrides = [storeProvider.overrideWith((ref) => store)];
         for (final page in const <Widget>[
           Dashboard(),
+          ReportsPage(),
           PosPage(),
           ProductImportPage(),
           BusinessInsightsPage(),

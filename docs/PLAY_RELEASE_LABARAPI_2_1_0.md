@@ -18,3 +18,5 @@ Both listings now contain the LabaRapi icon, feature graphic, and eight ordered 
 - Archived signed files: `build/labarapi-play-release/labarapi-2.1.0+7.apk` and `.aab`; SHA-256 and checks in `artifacts.json`; runtime equality in `runtime-parity.json`; executed logs in `logs/`.
 
 Console evidence and artifact hashes: [production evidence](play-release-labarapi-production.json). The verifier's `publicationPerformed: false` means that the local verification tool does not publish; it does not override the independently observed production status above. Physical camera/printer and budget-phone acceptance remain unverified.
+
+Source checkpoint `b323dad` pushed to `origin/main` on 2026-11-07. The only remaining external step is Google approval/propagation of the submitted listing changes; automatic publishing is enabled.

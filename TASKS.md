@@ -159,4 +159,4 @@ Every task inherits its feature acceptance criteria, dependencies, file scope an
 - [x] Capture updated phone/tablet UI; replace default tablet assets and refresh all existing custom-listing text/graphics while preserving targeting.
 - [x] Submit nine listing changes for review; verify submitted status and automatic publication after approval. Console evidence in docs/play-release-labarapi-production.json.
 - [ ] Google approval/propagation of the nine listing updates — external pending; production app binary is already active.
-- [ ] Preserve/push the source checkpoint and finalize evidence.
+- [x] Preserve/push source checkpoint b323dad to origin/main and finalize release evidence; existing untracked helper scripts retained.

@@ -187,6 +187,108 @@ void main() {
       },
     );
     testWidgets(
+      'feature reward grants access only on earned callback without quiet time',
+      (tester) async {
+        final access = RewardAccess(clock: () => now);
+        addTearDown(access.dispose);
+        final placement = PreparedPlacement(
+          PreparedFormat.rewarded,
+          service: GoogleAdsService(),
+          session: session,
+          clock: () => now,
+          onEarned: access.earn,
+        );
+        addTearDown(placement.dispose);
+        placement.start();
+        await tester.pump();
+        var id = ids['loadRewardedAd']!;
+        await event(tester, id, 'onAdLoaded');
+        var done = placement.show(safe: () => true);
+        await tester.pump();
+        await event(tester, id, 'onAdDismissedFullScreenContent');
+        expect(await done, isFalse);
+        expect(access.unlocked, isFalse);
+        id = ids['loadRewardedAd']!;
+        await event(tester, id, 'onAdLoaded');
+        done = placement.show(safe: () => true);
+        await tester.pump();
+        await event(tester, id, 'onRewardedAdUserEarnedReward', {
+          'rewardItem': RewardItem(1, 'features'),
+        });
+        final until = access.until;
+        now = now.add(const Duration(minutes: 1));
+        await event(tester, id, 'onRewardedAdUserEarnedReward', {
+          'rewardItem': RewardItem(1, 'features'),
+        });
+        expect(access.until, until);
+        await event(tester, id, 'onAdDismissedFullScreenContent');
+        expect(await done, isTrue);
+        expect(access.unlocked, isTrue);
+        expect(session.quiet, isFalse);
+      },
+    );
+
+    testWidgets(
+      'feature gate discloses reward, cancel never shows, earned access survives expiry in an open tool',
+      (tester) async {
+        final access = RewardAccess(clock: () => now);
+        addTearDown(access.dispose);
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: RewardFeatureGate(
+                feature: RewardFeature.calculator,
+                access: access,
+                builder: (_) => const Text('Protected tool'),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+        expect(find.text('Protected tool'), findsNothing);
+        await event(tester, ids['loadRewardedAd']!, 'onAdLoaded');
+        await tester.tap(find.text('Buka dengan iklan'));
+        await tester.pumpAndSettle();
+        expect(find.text('Tonton iklan untuk membuka?'), findsOneWidget);
+        expect(shows, 0);
+        await tester.tap(find.text('Batal'));
+        await tester.pumpAndSettle();
+        expect(find.text('Protected tool'), findsNothing);
+        expect(shows, 0);
+        await tester.tap(find.text('Buka dengan iklan'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Tonton iklan'));
+        await tester.pumpAndSettle();
+        expect(shows, 1);
+        final id = ids['loadRewardedAd']!;
+        await event(tester, id, 'onRewardedAdUserEarnedReward', {
+          'rewardItem': RewardItem(1, 'features'),
+        });
+        await event(tester, id, 'onAdDismissedFullScreenContent');
+        expect(find.text('Protected tool'), findsOneWidget);
+        now = access.until!;
+        await tester.pump(const Duration(minutes: 30));
+        expect(access.unlocked, isFalse);
+        expect(find.text('Protected tool'), findsOneWidget);
+        await tester.pumpWidget(const SizedBox());
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: RewardFeatureGate(
+                feature: RewardFeature.calculator,
+                access: access,
+                builder: (_) => const Text('Protected tool'),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+        expect(find.text('Protected tool'), findsNothing);
+        await tester.pumpWidget(const SizedBox());
+      },
+    );
+
+    testWidgets(
       'app-open respects shared fullscreen gate, cooldown and session cap',
       (tester) async {
         final placement = PreparedPlacement(

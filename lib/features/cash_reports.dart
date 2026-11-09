@@ -1,12 +1,22 @@
 part of 'app.dart';
 
-class CashReportsPage extends ConsumerStatefulWidget {
+class CashReportsPage extends StatelessWidget {
   const CashReportsPage({super.key});
   @override
-  ConsumerState<CashReportsPage> createState() => _CashReportsState();
+  Widget build(BuildContext context) => RewardFeatureGate(
+    fullPage: true,
+    feature: RewardFeature.advancedReports,
+    builder: (_) => const _CashReportsPageContent(),
+  );
 }
 
-class _CashReportsState extends ConsumerState<CashReportsPage> {
+class _CashReportsPageContent extends ConsumerStatefulWidget {
+  const _CashReportsPageContent();
+  @override
+  ConsumerState<_CashReportsPageContent> createState() => _CashReportsState();
+}
+
+class _CashReportsState extends ConsumerState<_CashReportsPageContent> {
   late DateTime start, end;
   String period = 'Hari ini';
   String? accountId;

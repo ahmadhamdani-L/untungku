@@ -197,6 +197,28 @@ Future<void> expenseDialog(BuildContext c, Store store, [Expense? e]) async {
                 controller: category,
                 decoration: const InputDecoration(labelText: 'Kategori'),
               ),
+              const SizedBox(height: 8),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  spacing: 6,
+                  children: [
+                    for (final cat in [
+                      'Operasional',
+                      'Listrik & Air',
+                      'Sewa Tempat',
+                      'Gaji Karyawan',
+                      'Transport & Bensin',
+                      'Bahan Baku',
+                      'Perlengkapan',
+                    ])
+                      ActionChip(
+                        label: Text(cat, style: const TextStyle(fontSize: 12)),
+                        onPressed: () => set(() => category.text = cat),
+                      ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 12),
               TextField(
                 controller: amount,
@@ -345,7 +367,8 @@ class _SaleFormState extends ConsumerState<SaleForm> {
       fee,
       note,
       customer,
-      initialPaid;
+      initialPaid,
+      cashTendered;
   bool credit = false;
   String? dueDate;
   String payment = 'Tunai';
@@ -371,6 +394,7 @@ class _SaleFormState extends ConsumerState<SaleForm> {
     payment = s?.payment ?? 'Tunai';
     customer = TextEditingController(text: s?.customer ?? '');
     initialPaid = TextEditingController(text: '0');
+    cashTendered = TextEditingController();
     credit = s?.credit ?? false;
     dueDate = s?.dueDate;
     date = s == null ? DateTime.now() : DateTime.parse(s.date);
@@ -403,7 +427,15 @@ class _SaleFormState extends ConsumerState<SaleForm> {
     for (final e in cart) {
       e.dispose();
     }
-    for (final e in [discount, fixed, fee, note, customer, initialPaid]) {
+    for (final e in [
+      discount,
+      fixed,
+      fee,
+      note,
+      customer,
+      initialPaid,
+      cashTendered,
+    ]) {
       e.dispose();
     }
     super.dispose();
@@ -603,6 +635,129 @@ class _SaleFormState extends ConsumerState<SaleForm> {
             },
           ),
           const SizedBox(height: 16),
+          if (payment == 'Tunai' && !credit && result != null) ...[
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.calculate_outlined,
+                          color: Color(0xFF0066E6),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Kalkulator Kembalian',
+                          style: Theme.of(c).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: cashTendered,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Uang tunai diterima (Rp)',
+                        prefixText: 'Rp ',
+                      ),
+                      onChanged: (_) => setState(() {}),
+                    ),
+                    const SizedBox(height: 10),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        spacing: 8,
+                        children: [
+                          ActionChip(
+                            label: const Text('Uang Pas'),
+                            onPressed: () => setState(
+                              () => cashTendered.text = result!.revenue
+                                  .toString(),
+                            ),
+                          ),
+                          for (final nominal in [
+                            if (result.revenue < 10000) 10000,
+                            if (result.revenue < 20000) 20000,
+                            if (result.revenue < 50000) 50000,
+                            if (result.revenue < 100000) 100000,
+                            if (result.revenue < 200000 &&
+                                result.revenue > 50000)
+                              200000,
+                            if (result.revenue < 500000 &&
+                                result.revenue > 100000)
+                              500000,
+                          ])
+                            ActionChip(
+                              label: Text(rupiah(nominal)),
+                              onPressed: () => setState(
+                                () => cashTendered.text = nominal.toString(),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    if (int.tryParse(cashTendered.text) != null &&
+                        int.parse(cashTendered.text) > 0) ...[
+                      const SizedBox(height: 12),
+                      Builder(
+                        builder: (_) {
+                          final tendered = int.parse(cashTendered.text);
+                          final change = tendered - result!.revenue;
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: change >= 0
+                                  ? const Color(0xFFE6FCF5)
+                                  : const Color(0xFFFFF5F5),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: change >= 0
+                                    ? const Color(0xFF20C997)
+                                    : const Color(0xFFFF6B6B),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  change >= 0 ? 'Kembalian:' : 'Kurang:',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: change >= 0
+                                        ? const Color(0xFF087F5B)
+                                        : const Color(0xFFC92A2A),
+                                  ),
+                                ),
+                                Text(
+                                  rupiah(change >= 0 ? change : -change),
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w800,
+                                    color: change >= 0
+                                        ? const Color(0xFF087F5B)
+                                        : const Color(0xFFC92A2A),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
           if (widget.sale == null) ...[
             FutureBuilder<List<Contact>>(
               future: availableCustomers,

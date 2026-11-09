@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 part 'ad_placements.dart';
+part 'reward_features.dart';
 
 enum AdState { idle, loading, loaded, dismissed, failed, rewarded }
 
@@ -417,9 +418,10 @@ class CompletionAdPolicy {
   final DateTime started;
   DateTime? lastShown;
   int completions = 0, shown = 0;
+  int productInputs = 0;
   CompletionAdPolicy(this.started);
-  bool eligible(DateTime now) =>
-      completions >= 3 &&
+  bool eligible(DateTime now) => completions >= 3 && withinLimits(now);
+  bool withinLimits(DateTime now) =>
       shown < 5 &&
       now.difference(started) >= const Duration(minutes: 2) &&
       (lastShown == null ||
@@ -553,14 +555,21 @@ class CompletionAds with WidgetsBindingObserver {
     }
   }
 
-  Future<void> completed() async {
-    if (!liveAdsEnabled || _showing || !adSession.automaticAllowed) return;
-    policy.completions++;
+  Future<void> completed({bool productInput = false}) async {
+    if (!liveAdsEnabled) return;
+    // Count every committed new product even when cooldown/fill prevents a show.
+    // Edits and failed saves never enter this boundary.
+    if (productInput) {
+      policy.productInputs++;
+    } else {
+      policy.completions++;
+    }
+    if (_showing || !adSession.automaticAllowed) return;
     final now = DateTime.now();
-    if (!policy.eligible(now) ||
-        !_foreground ||
-        _adPrivacyOpen.value ||
-        _ad == null) {
+    final eligible = productInput
+        ? policy.productInputs.isOdd && policy.withinLimits(now)
+        : policy.eligible(now);
+    if (!eligible || !_foreground || _adPrivacyOpen.value || _ad == null) {
       unawaited(_prepare());
       return;
     }

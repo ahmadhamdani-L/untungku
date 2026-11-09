@@ -47,7 +47,14 @@ class _SettingsState extends ConsumerState<SettingsPage> {
       body: PageBody(
         children: [
           heading(c, 'Sesuai cara Anda', 'Preferensi dan keamanan data usaha.'),
-          const RewardedQuietTile(),
+          const Card(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Text(
+                '6 fitur tambahan dapat dibuka selama 30 menit pada sesi ini dengan menyelesaikan satu iklan. Buka alat yang terkunci untuk melihat rincian dan konfirmasi. Pencatatan dasar, PIN, backup dan pemulihan tetap gratis.',
+              ),
+            ),
+          ),
           TextField(
             controller: name,
             decoration: const InputDecoration(labelText: 'Nama usaha'),

@@ -62,6 +62,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Simpan produk'));
     await tester.pumpAndSettle();
+    expect(find.text('Produk tersimpan'), findsOneWidget);
+    await tester.tap(find.text('Selesai'));
+    await tester.pumpAndSettle();
     expect(store.products.single.name, 'Kopi Integrasi');
     final p = store.products.single;
     await tester.tap(find.text('Transaksi'));

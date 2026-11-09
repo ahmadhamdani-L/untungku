@@ -156,6 +156,64 @@ void main() {
       },
     );
 
+    testWidgets(
+      'new product odd count survives skipped fills and even inputs never show',
+      (tester) async {
+        var shows = 0;
+        var id = -1;
+        final messenger =
+            TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+        messenger.setMockMethodCallHandler(channel, (call) async {
+          if (call.method == 'MobileAds#initialize') {
+            return InitializationStatus(<String, AdapterStatus>{});
+          }
+          if (call.method == 'loadInterstitialAd') {
+            id = (call.arguments as Map)['adId'] as int;
+          }
+          if (call.method == 'showAdWithoutView') shows++;
+          return null;
+        });
+        Future<void> event(String name) async {
+          await messenger.handlePlatformMessage(
+            channel.name,
+            channel.codec.encodeMethodCall(
+              MethodCall('onAdEvent', {'adId': id, 'eventName': name}),
+            ),
+            (_) {},
+          );
+          await tester.pump();
+        }
+
+        adSession.lastFullscreen = null;
+        final policy = CompletionAdPolicy(
+          DateTime.now().subtract(const Duration(minutes: 3)),
+        );
+        final ads = CompletionAds(policy: policy, service: GoogleAdsService());
+        addTearDown(ads.dispose);
+        ads.start();
+        await tester.pump();
+        await ads.completed(productInput: true); // First input while loading.
+        expect(policy.productInputs, 1);
+        expect(shows, 0);
+        await event('onAdLoaded');
+        expect(shows, 0); // Never show from a late load.
+        await ads.completed(productInput: true); // Even with a prepared ad.
+        expect(shows, 0);
+        final done = ads.completed(productInput: true);
+        await tester.pump();
+        expect(shows, 1);
+        await event('onAdShowedFullScreenContent');
+        await event('onAdDismissedFullScreenContent');
+        await done;
+        await ads.completed(productInput: true);
+        await ads.completed(
+          productInput: true,
+        ); // Cooldown: count still advances.
+        expect(policy.productInputs, 5);
+        expect(shows, 1);
+      },
+    );
+
     testWidgets('no fill retries with backoff and stops when removed', (
       tester,
     ) async {

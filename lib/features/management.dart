@@ -331,6 +331,42 @@ class ContactDetail extends ConsumerWidget {
                     ? 'Kontak usaha'
                     : p.phone,
               ),
+              if (p.phone.isNotEmpty) ...[
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    ActionChip(
+                      avatar: const Icon(Icons.chat_outlined, size: 16),
+                      label: const Text('Kirim pesan / WhatsApp'),
+                      onPressed: () async {
+                        final business =
+                            store.settings['business']?.toString() ??
+                            'Toko Kami';
+                        final box = c.findRenderObject() as RenderBox?;
+                        await SharePlus.instance.share(
+                          ShareParams(
+                            text: 'Halo ${p.name}, salam dari $business.',
+                            sharePositionOrigin: box == null
+                                ? null
+                                : box.localToGlobal(Offset.zero) & box.size,
+                          ),
+                        );
+                      },
+                    ),
+                    ActionChip(
+                      avatar: const Icon(Icons.copy_outlined, size: 16),
+                      label: const Text('Salin nomor'),
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: p.phone));
+                        ScaffoldMessenger.of(c).showSnackBar(
+                          SnackBar(content: Text('Nomor ${p.phone} disalin')),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+              ],
               if (p.address.isNotEmpty) Text(p.address),
               if (p.notes.isNotEmpty) Text(p.notes),
               OutlinedButton.icon(

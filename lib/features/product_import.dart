@@ -1,12 +1,23 @@
 part of 'app.dart';
 
-class ProductImportPage extends ConsumerStatefulWidget {
+class ProductImportPage extends StatelessWidget {
   const ProductImportPage({super.key});
   @override
-  ConsumerState<ProductImportPage> createState() => _ProductImportState();
+  Widget build(BuildContext context) => RewardFeatureGate(
+    fullPage: true,
+    feature: RewardFeature.csvImport,
+    builder: (_) => const _ProductImportPageContent(),
+  );
 }
 
-class _ProductImportState extends ConsumerState<ProductImportPage> {
+class _ProductImportPageContent extends ConsumerStatefulWidget {
+  const _ProductImportPageContent();
+  @override
+  ConsumerState<_ProductImportPageContent> createState() =>
+      _ProductImportState();
+}
+
+class _ProductImportState extends ConsumerState<_ProductImportPageContent> {
   CsvTable? table;
   ProductImportPlan? plan;
   final mapping = <String, int?>{};

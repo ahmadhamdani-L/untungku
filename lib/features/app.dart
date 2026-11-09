@@ -5,7 +5,8 @@ import 'package:flutter/foundation.dart' show compute;
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show SystemUiOverlayStyle;
+import 'package:flutter/services.dart'
+    show SystemUiOverlayStyle, Clipboard, ClipboardData;
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -297,8 +298,7 @@ class Home extends ConsumerStatefulWidget {
 
 class _HomeState extends ConsumerState<Home> with WidgetsBindingObserver {
   late final PreparedPlacement openingAds;
-  DateTime? backgrounded;
-  int safeReturns = 0;
+  final resumePolicy = WarmResumePolicy();
   bool resuming = false;
   bool get safeForOpeningAd =>
       mounted &&
@@ -309,19 +309,13 @@ class _HomeState extends ConsumerState<Home> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused && !adSession.fullscreen) {
-      backgrounded = DateTime.now();
+    if (state == AppLifecycleState.paused) {
+      resumePolicy.background(fullscreen: adSession.fullscreen);
     } else if (state == AppLifecycleState.resumed) {
-      final since = backgrounded;
-      backgrounded = null;
-      if (since == null ||
-          DateTime.now().difference(since) < const Duration(seconds: 30) ||
-          !safeForOpeningAd ||
-          resuming) {
+      if (!resumePolicy.resume() || !safeForOpeningAd || resuming) {
         return;
       }
-      safeReturns++;
-      if (safeReturns < 3 || !openingAds.canOpen) return;
+      if (!openingAds.canOpen) return;
       setState(() => resuming = true);
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         try {
@@ -419,7 +413,7 @@ class _HomeState extends ConsumerState<Home> with WidgetsBindingObserver {
                     const Dashboard(),
                     const TransactionsPage(),
                     ReportsPage(active: index == 2),
-                    const ProductsPage(),
+                    ProductsPage(active: index == 3),
                     const ManagementPage(),
                   ],
                 ),
@@ -609,7 +603,11 @@ Widget balanceCard(
   ),
 );
 
-Future<void> showSaveSuccess(BuildContext context, String message) async {
+Future<void> showSaveSuccess(
+  BuildContext context,
+  String message, {
+  bool productInput = false,
+}) async {
   var busy = false;
   await showDialog<void>(
     context: context,
@@ -632,7 +630,9 @@ Future<void> showSaveSuccess(BuildContext context, String message) async {
                   : () async {
                       set(() => busy = true);
                       try {
-                        await transactionAds.completed();
+                        await transactionAds.completed(
+                          productInput: productInput,
+                        );
                       } finally {
                         if (d.mounted) Navigator.pop(d);
                       }

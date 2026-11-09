@@ -195,12 +195,47 @@ class SaleDetailPage extends ConsumerWidget {
                   '${DateFormat('dd MMM yyyy • HH:mm', 'id_ID').format(DateTime.parse(p.date).toLocal())} • ${p.method}',
                 ),
               ),
-            if (!s.voided && s.outstanding > 0)
+            if (!s.voided && s.outstanding > 0) ...[
               FilledButton.icon(
                 onPressed: () => paymentDialog(c, store, s),
                 icon: const Icon(Icons.add_card),
                 label: const Text('Catat pelunasan'),
               ),
+              const SizedBox(height: 10),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  final business =
+                      store.settings['business']?.toString() ?? 'Toko Kami';
+                  final dateStr = DateFormat(
+                    'dd/MM/yyyy',
+                  ).format(DateTime.parse(s.date).toLocal());
+                  final dueStr = s.dueDate != null
+                      ? 'Jatuh tempo: ${s.dueDate}\n'
+                      : '';
+                  final message =
+                      'Halo ${s.customer.isEmpty ? 'Pelanggan' : s.customer},\n'
+                      'Berikut pengingat tagihan dari *$business*:\n'
+                      '• No. Transaksi: ${s.id}\n'
+                      '• Tanggal: $dateStr\n'
+                      '• Total Belanja: ${rupiah(s.result.revenue)}\n'
+                      '• Sudah Dibayar: ${rupiah(s.paid)}\n'
+                      '• *Sisa Tagihan: ${rupiah(s.outstanding)}*\n'
+                      '$dueStr\n'
+                      'Mohon konfirmasi jika pembayaran telah dilakukan. Terima kasih!';
+                  final box = c.findRenderObject() as RenderBox?;
+                  await SharePlus.instance.share(
+                    ShareParams(
+                      text: message,
+                      sharePositionOrigin: box == null
+                          ? null
+                          : box.localToGlobal(Offset.zero) & box.size,
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.send_outlined),
+                label: const Text('Kirim pengingat tagihan (WhatsApp)'),
+              ),
+            ],
           ],
           const SizedBox(height: 16),
           OutlinedButton.icon(

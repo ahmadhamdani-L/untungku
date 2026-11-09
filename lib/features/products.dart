@@ -1,14 +1,23 @@
 part of 'app.dart';
 
 class ProductsPage extends ConsumerStatefulWidget {
-  const ProductsPage({super.key});
+  final bool active;
+  const ProductsPage({super.key, this.active = true});
   @override
   ConsumerState<ProductsPage> createState() => _ProductsState();
 }
 
 class _ProductsState extends ConsumerState<ProductsPage> {
+  final search = TextEditingController();
   String query = '', category = 'Semua', sort = 'Nama';
   bool archived = false;
+
+  @override
+  void dispose() {
+    search.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext c) {
     final store = ref.watch(storeProvider);
@@ -47,9 +56,26 @@ class _ProductsState extends ConsumerState<ProductsPage> {
         ),
         const SizedBox(height: 16),
         TextField(
-          decoration: const InputDecoration(
-            hintText: 'Cari nama atau SKU',
-            prefixIcon: Icon(Icons.search),
+          controller: search,
+          decoration: InputDecoration(
+            hintText: 'Cari nama, SKU, atau barcode',
+            prefixIcon: const Icon(Icons.search),
+            suffixIcon: IconButton(
+              tooltip: 'Pindai barcode produk',
+              icon: const Icon(Icons.qr_code_scanner),
+              onPressed: () async {
+                final code = await Navigator.push<String>(
+                  c,
+                  MaterialPageRoute(builder: (_) => const BarcodeScanPage()),
+                );
+                if (code != null && mounted) {
+                  setState(() {
+                    search.text = code;
+                    query = code;
+                  });
+                }
+              },
+            ),
           ),
           onChanged: (v) => setState(() => query = v),
         ),
@@ -87,7 +113,7 @@ class _ProductsState extends ConsumerState<ProductsPage> {
             'Tambahkan produk pertama beserta modal dan stok awal.',
             Icons.inventory_2_outlined,
           ),
-        for (final p in ps)
+        for (final (i, p) in ps.indexed) ...[
           Card(
             child: ListTile(
               contentPadding: const EdgeInsets.all(16),
@@ -169,6 +195,11 @@ class _ProductsState extends ConsumerState<ProductsPage> {
               ),
             ),
           ),
+          if (widget.active &&
+              (i + 1) % 3 == 0 &&
+              MediaQuery.sizeOf(c).width >= 360)
+            OptionalNativeAd(key: ValueKey('product-ad-${p.id}')),
+        ],
       ],
     );
   }
@@ -333,6 +364,7 @@ class _ProductFormState extends ConsumerState<ProductForm> {
                     keyboardType: i >= 3
                         ? TextInputType.numberWithOptions(signed: i == 7)
                         : TextInputType.text,
+                    onChanged: (_) => setState(() {}),
                     decoration: InputDecoration(
                       labelText: [
                         'Nama produk',
@@ -365,6 +397,116 @@ class _ProductFormState extends ConsumerState<ProductForm> {
                     },
                   ),
                 ),
+                if (i == 2) ...[
+                  Builder(
+                    builder: (context) {
+                      final existingCategories = ref
+                          .watch(storeProvider)
+                          .products
+                          .map((p) => p.category.trim())
+                          .where((c) => c.isNotEmpty)
+                          .toSet();
+                      if (existingCategories.isEmpty) return const SizedBox();
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            spacing: 6,
+                            children: [
+                              for (final cat in existingCategories)
+                                ActionChip(
+                                  label: Text(
+                                    cat,
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                  onPressed: () =>
+                                      setState(() => fields[2].text = cat),
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+                if (i == 6) ...[
+                  Builder(
+                    builder: (context) {
+                      final cost = int.tryParse(fields[3].text) ?? 0;
+                      final price = int.tryParse(fields[4].text) ?? 0;
+                      final packaging = int.tryParse(fields[5].text) ?? 0;
+                      final extra = int.tryParse(fields[6].text) ?? 0;
+                      final totalCost = cost + packaging + extra;
+                      final profit = price - totalCost;
+                      final margin = price > 0 ? (profit * 100 / price) : 0.0;
+                      final isPositive = profit >= 0;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isPositive
+                                ? const Color(0xFFEBFBEE)
+                                : const Color(0xFFFFF5F5),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: isPositive
+                                  ? const Color(0xFF51CF66)
+                                  : const Color(0xFFFF6B6B),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                isPositive
+                                    ? Icons.trending_up
+                                    : Icons.trending_down,
+                                color: isPositive
+                                    ? const Color(0xFF2B8A3E)
+                                    : const Color(0xFFC92A2A),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      isPositive
+                                          ? 'Estimasi Untung Kotor per Unit'
+                                          : 'Peringatan: Harga di Bawah Modal!',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: isPositive
+                                            ? const Color(0xFF2B8A3E)
+                                            : const Color(0xFFC92A2A),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${rupiah(profit)} (Margin ${margin.toStringAsFixed(1)}%)',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w800,
+                                        color: isPositive
+                                            ? const Color(0xFF2B8A3E)
+                                            : const Color(0xFFC92A2A),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ],
               TextFormField(
                 controller: barcode,
@@ -430,6 +572,15 @@ class _ProductFormState extends ConsumerState<ProductForm> {
                                 ),
                                 expectedUpdated: widget.product?.updated,
                               );
+                          if (c.mounted) {
+                            if (widget.product == null) {
+                              await showSaveSuccess(
+                                c,
+                                'Produk tersimpan',
+                                productInput: true,
+                              );
+                            }
+                          }
                           if (c.mounted) {
                             Navigator.pop(c);
                           }

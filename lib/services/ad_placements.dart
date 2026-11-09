@@ -41,6 +41,23 @@ class AdSession extends ChangeNotifier {
 
 final adSession = AdSession();
 
+/// Warm returns only; ad-generated pauses must not create another opportunity.
+class WarmResumePolicy {
+  final DateTime Function() now;
+  DateTime? _backgrounded;
+  WarmResumePolicy({DateTime Function()? clock}) : now = clock ?? DateTime.now;
+  void background({required bool fullscreen}) {
+    if (!fullscreen) _backgrounded = now();
+  }
+
+  bool resume() {
+    final since = _backgrounded;
+    _backgrounded = null;
+    return since != null &&
+        now().difference(since) >= const Duration(seconds: 30);
+  }
+}
+
 enum PreparedFormat { rewarded, appOpen }
 
 /// Only preloaded ads may be shown. Late loads cannot interrupt the user.
@@ -49,11 +66,13 @@ class PreparedPlacement extends ChangeNotifier with WidgetsBindingObserver {
   final GoogleAdsService service;
   final AdSession session;
   final DateTime Function() now;
+  final VoidCallback? onEarned;
   PreparedPlacement(
     this.format, {
     GoogleAdsService? service,
     AdSession? session,
     DateTime Function()? clock,
+    this.onEarned,
   }) : service = service ?? _googleAdsService,
        session = session ?? adSession,
        now = clock ?? DateTime.now;
@@ -251,7 +270,11 @@ class PreparedPlacement extends ChangeNotifier with WidgetsBindingObserver {
           onUserEarnedReward: (_, reward) {
             if (!earned && !finished && !_disposed) {
               earned = true;
-              session.earnQuietTime();
+              if (onEarned != null) {
+                onEarned!();
+              } else {
+                session.earnQuietTime();
+              }
             }
           },
         );
@@ -413,6 +436,8 @@ class _OptionalNativeAdState extends State<OptionalNativeAd>
   Widget build(BuildContext context) {
     if (!liveAdsEnabled ||
         adSession.quiet ||
+        !_loaded ||
+        _ad == null ||
         ModalRoute.isCurrentOf(context) == false) {
       return const SizedBox.shrink();
     }
@@ -425,9 +450,7 @@ class _OptionalNativeAdState extends State<OptionalNativeAd>
           SizedBox(
             height: 120,
             width: 400,
-            child: _loaded && _ad != null
-                ? AdWidget(ad: _ad!)
-                : const SizedBox.shrink(),
+            child: AdWidget(ad: _ad!),
           ),
         ],
       ),
@@ -482,6 +505,11 @@ class _RewardedQuietTileState extends State<RewardedQuietTile> {
                 onPressed: busy || adSession.quiet || !placement.ready
                     ? null
                     : () async {
+                        final confirmed = await confirmRewardAd(
+                          context,
+                          'Jeda semua iklan selama 30 menit pada sesi ini.',
+                        );
+                        if (!confirmed || !mounted) return;
                         setState(() => busy = true);
                         final earned = await placement.show(
                           safe: () =>

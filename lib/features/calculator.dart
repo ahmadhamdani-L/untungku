@@ -1,12 +1,21 @@
 part of 'app.dart';
 
-class CalculatorPage extends StatefulWidget {
+class CalculatorPage extends StatelessWidget {
   const CalculatorPage({super.key});
   @override
-  State<CalculatorPage> createState() => _CalculatorState();
+  Widget build(BuildContext context) => RewardFeatureGate(
+    feature: RewardFeature.calculator,
+    builder: (_) => const _CalculatorPageContent(),
+  );
 }
 
-class _CalculatorState extends State<CalculatorPage> {
+class _CalculatorPageContent extends StatefulWidget {
+  const _CalculatorPageContent();
+  @override
+  State<_CalculatorPageContent> createState() => _CalculatorState();
+}
+
+class _CalculatorState extends State<_CalculatorPageContent> {
   final controllers = List.generate(
     10,
     (i) => TextEditingController(

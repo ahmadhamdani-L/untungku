@@ -204,10 +204,29 @@ class _PosState extends ConsumerState<PosPage> {
           for (final product in products)
             Card(
               child: ListTile(
+                leading: cart.quantities[product.id] != null
+                    ? Badge(
+                        label: Text('${cart.quantities[product.id]}'),
+                        backgroundColor: const Color(0xFF0066E6),
+                        child: const CircleAvatar(
+                          child: Icon(Icons.inventory_2_outlined),
+                        ),
+                      )
+                    : const CircleAvatar(
+                        child: Icon(Icons.inventory_2_outlined),
+                      ),
                 title: Text(product.name),
                 subtitle: Text(
-                  '${rupiah(product.price)} • Stok ${product.stock}',
+                  '${rupiah(product.price)} • Stok ${product.stock}${cart.quantities[product.id] != null ? ' • (${cart.quantities[product.id]} di keranjang)' : ''}',
                 ),
+                onTap: () => action(c, () async {
+                  setState(
+                    () => cart.add(
+                      product,
+                      allowNegativeStock: store.allowNegativeStock,
+                    ),
+                  );
+                }),
                 trailing: IconButton(
                   tooltip: 'Tambah ${product.name}',
                   icon: const Icon(Icons.add_shopping_cart),
@@ -296,6 +315,60 @@ class _PosState extends ConsumerState<PosPage> {
           ),
         ],
       ),
+      bottomNavigationBar: cart.quantities.isEmpty
+          ? null
+          : Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Theme.of(c).colorScheme.surface,
+                border: Border(
+                  top: BorderSide(
+                    color: Theme.of(c).dividerColor.withOpacity(0.12),
+                  ),
+                ),
+              ),
+              child: SafeArea(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${cart.quantities.values.fold(0, (a, b) => a + b)} barang di keranjang',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          Text(
+                            rupiah(total),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    FilledButton.icon(
+                      icon: const Icon(Icons.shopping_cart_checkout),
+                      label: const Text('Bayar'),
+                      onPressed: () async {
+                        final result = await Navigator.push<String>(
+                          c,
+                          MaterialPageRoute(
+                            builder: (_) => SaleForm(
+                              initialCart: cart.quantities,
+                              previewAfterSave: true,
+                            ),
+                          ),
+                        );
+                        if (result != null && mounted) setState(cart.clear);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
     );
   }
 }

@@ -1,12 +1,24 @@
 part of 'app.dart';
 
-class BusinessInsightsPage extends ConsumerStatefulWidget {
+class BusinessInsightsPage extends StatelessWidget {
   const BusinessInsightsPage({super.key});
   @override
-  ConsumerState<BusinessInsightsPage> createState() => _BusinessInsightsState();
+  Widget build(BuildContext context) => RewardFeatureGate(
+    fullPage: true,
+    feature: RewardFeature.insights,
+    builder: (_) => const _BusinessInsightsPageContent(),
+  );
 }
 
-class _BusinessInsightsState extends ConsumerState<BusinessInsightsPage> {
+class _BusinessInsightsPageContent extends ConsumerStatefulWidget {
+  const _BusinessInsightsPageContent();
+  @override
+  ConsumerState<_BusinessInsightsPageContent> createState() =>
+      _BusinessInsightsState();
+}
+
+class _BusinessInsightsState
+    extends ConsumerState<_BusinessInsightsPageContent> {
   int days = 7;
   bool showHidden = false;
   @override

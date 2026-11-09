@@ -185,6 +185,23 @@ class _ReceiptState extends ConsumerState<ReceiptPage> {
                     );
                   }),
           ),
+          OutlinedButton.icon(
+            icon: const Icon(Icons.chat_outlined),
+            label: const Text('Bagikan teks struk (WhatsApp / SMS)'),
+            onPressed: busy
+                ? null
+                : () => run(() async {
+                    final box = context.findRenderObject() as RenderBox?;
+                    await SharePlus.instance.share(
+                      ShareParams(
+                        text: receipt.text(),
+                        sharePositionOrigin: box == null
+                            ? null
+                            : box.localToGlobal(Offset.zero) & box.size,
+                      ),
+                    );
+                  }),
+          ),
           TextButton(
             onPressed: () => Navigator.push(
               c,

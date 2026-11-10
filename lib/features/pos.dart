@@ -323,7 +323,7 @@ class _PosState extends ConsumerState<PosPage> {
                 color: Theme.of(c).colorScheme.surface,
                 border: Border(
                   top: BorderSide(
-                    color: Theme.of(c).dividerColor.withOpacity(0.12),
+                    color: Theme.of(c).dividerColor.withValues(alpha: 0.12),
                   ),
                 ),
               ),

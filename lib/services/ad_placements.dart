@@ -447,11 +447,7 @@ class _OptionalNativeAdState extends State<OptionalNativeAd>
         children: [
           const Text('Iklan', style: TextStyle(fontSize: 12)),
           const SizedBox(height: 12),
-          SizedBox(
-            height: 120,
-            width: 400,
-            child: AdWidget(ad: _ad!),
-          ),
+          SizedBox(height: 120, width: 400, child: AdWidget(ad: _ad!)),
         ],
       ),
     );

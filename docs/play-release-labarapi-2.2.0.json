@@ -1,0 +1,22 @@
+{
+  "observedAt": "2026-11-10T12:33:59.000000+07:00",
+  "package": "id.untungku.untungku_pro",
+  "versionName": "2.2.0",
+  "versionCode": 8,
+  "productionTrack": "https://play.google.com/console/u/0/developers/5449916773924433827/app/4972755704580858789/tracks/production",
+  "publishingUrl": "https://play.google.com/console/u/0/developers/5449916773924433827/app/4972755704580858789/publishing",
+  "status": "Perubahan yang sedang ditinjau (Submitted; Google quick checks running before review)",
+  "releaseName": "2.2.0 - LabaRapi Kasir dan Usaha",
+  "releaseNotes": "<id>\nPembaruan LabaRapi v2.2.0:\n• Optimalisasi katalog produk dan kasir cepat.\n• Penyempurnaan laporan arus kas dan asisten insight usaha.\n• Peningkatan stabilitas pencatatan penjualan dan stok opname offline.\n• Perbaikan performa dan pengalaman penggunaan aplikasi.\nData usaha tetap aman tersimpan di perangkat.\n</id>",
+  "rolloutPercent": 100,
+  "countryAvailability": "178 negara/wilayah",
+  "managedPublishingEnabled": false,
+  "automaticPublicationAfterApproval": true,
+  "signedArtifact": {
+    "path": "build/release/LabaRapi-2.2.0-code8-production.aab",
+    "bytes": 84446414,
+    "sha256": "3e5ffce85b18369223de8c6b349a5aefe8d503e83c2e67718a0b1ffe9259b37c",
+    "signature": "META-INF/UPLOAD.RSA (owner upload key)"
+  },
+  "submittedItem": "Produksi: 2.2.0 - LabaRapi Kasir dan Usaha (Memulai peluncuran penuh)"
+}

@@ -1,6 +1,15 @@
 # UntungKu Pro v2 checkpoint
 
-## Current release checkpoint — 2026-11-07
+## Current release checkpoint — 2026-11-10 (LabaRapi v2.2.0+8)
+
+- Production **LabaRapi 2.2.0 / code 8** signed with owner upload key and successfully uploaded to Google Play Console production track.
+- SHA-256: `3e5ffce85b18369223de8c6b349a5aefe8d503e83c2e67718a0b1ffe9259b37c` (84,446,414 bytes, `build/release/LabaRapi-2.2.0-code8-production.aab`).
+- Rollout set to 100% across all 178 target countries/regions with updated release notes in Indonesian.
+- Release submitted to Google Play review. Status confirmed in Google Play Console: **"Perubahan yang sedang ditinjau"** (quick pre-review checks running; automatic release upon approval, managed publishing disabled).
+- Code validation passed: `dart format` (98 files), `flutter analyze --no-pub` (0 issues), and unit test suite passed.
+- Evidence recorded in `docs/play-release-labarapi-2.2.0.json`.
+
+## Previous release checkpoint — 2026-11-07
 
 - Production **LabaRapi 2.1.0 / code 7** verified **Tersedia di Google Play**, displayed release date **7 Nov 05.17**, 178 countries. Existing active bundle was not uploaded again. Package id.untungku.untungku_pro and existing key/production profile preserved.
 - Default listing tablet assets updated; full existing custom listing for 177 countries changed from old UntungKu branding to LabaRapi while preserving targeting and 100% rollout. Both now have new icon/feature graphic, feature-focused text, eight ordered phone and eight ordered 7-inch-tablet captures from actual app/example data. AI graphic provenance declared for icon/feature graphic only; actual screenshots remain unlabelled.
